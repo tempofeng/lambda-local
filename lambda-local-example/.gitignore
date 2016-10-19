@@ -1,1 +1,3 @@
 /build/
+/lambda-local-example-deployer/
+/deploy.sh
