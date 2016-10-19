@@ -1,0 +1,5 @@
+rootProject.name = 'lambda-local-root'
+
+include 'lambda-local'
+include 'lambda-local-example'
+include 'lambda-local-example:lambda-local-example-deployer'

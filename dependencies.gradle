@@ -1,0 +1,41 @@
+ext {
+    // assertj
+    assertjCore = 'org.assertj:assertj-core:3.5.2'
+
+    // aws
+    awsJavaSdk = 'com.amazonaws:aws-java-sdk:1.11.44'
+
+    // aws lambda
+    awsLambdaJavaCore = 'com.amazonaws:aws-lambda-java-core:1.1.0'
+    awsLambdaJavaEvents = 'com.amazonaws:aws-lambda-java-events:1.1.0'
+    awsLambdaJavaLog4j = 'com.amazonaws:aws-lambda-java-log4j:1.0.0'
+
+    // commons
+    commonsIO = 'commons-io:commons-io:2.5'
+    commonsLang = 'org.apache.commons:commons-lang3:3.4'
+
+    // guava
+    guava = 'com.google.guava:guava:19.0'
+
+    // jackson
+    jacksonCore = 'com.fasterxml.jackson.core:jackson-core:2.8.4'
+    jacksonDatabind = 'com.fasterxml.jackson.core:jackson-databind:2.8.4'
+    jacksonAnnotation = 'com.fasterxml.jackson.core:jackson-annotations:2.8.4'
+    jacksonModuleAfterburner = 'com.fasterxml.jackson.module:jackson-module-afterburner:2.8.4'
+
+    // jetbrain-annotations
+    jetBrainAnnotations = 'org.jetbrains:annotations:15.0'
+
+    // jsr305
+    jsr305 = 'com.google.code.findbugs:jsr305:3.0.1'
+
+    // junit
+    junit = 'junit:junit:4.12'
+
+    // mockito
+    mockitoCore = 'org.mockito:mockito-core:2.2.5'
+
+    // slf4j
+    slf4jApi = 'org.slf4j:slf4j-api:1.7.21'
+    slf4jLog4j12 = 'org.slf4j:slf4j-log4j12:1.7.21' //include log4j
+}

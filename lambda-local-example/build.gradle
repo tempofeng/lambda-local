@@ -1,0 +1,65 @@
+apply plugin: 'java'
+apply plugin: 'war'
+apply from: 'https://raw.github.com/akhikhl/gretty/master/pluginScripts/gretty.plugin'
+
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+    options.encoding = 'UTF-8'
+}
+
+dependencies {
+    compile project(':lambda-local')
+
+    // guava
+    compile rootProject.ext.guava
+
+    // aws lambda
+    compile rootProject.ext.awsLambdaJavaCore
+    compile rootProject.ext.awsLambdaJavaEvents
+    compile rootProject.ext.awsLambdaJavaLog4j
+
+    // jackson
+    compile rootProject.ext.jacksonCore
+    compile rootProject.ext.jacksonDatabind
+    compile rootProject.ext.jacksonAnnotation
+
+    // slf4j
+    compile rootProject.ext.slf4jApi
+    compile rootProject.ext.slf4jLog4j12
+
+    // https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api
+    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+
+    // assertj
+    testCompile rootProject.ext.assertjCore
+
+    // junit
+    testCompile rootProject.ext.junit
+
+    // mockito
+    testCompile rootProject.ext.mockitoCore
+}
+
+task buildZip(type: Zip) {
+    from compileJava
+    from processResources
+    into('lib') {
+        from configurations.runtime
+    }
+}
+
+build.dependsOn buildZip
+
+gretty {
+    // supported values:
+    // 'jetty7', 'jetty8', 'jetty9', 'tomcat7', 'tomcat8'
+    servletContainer = 'jetty9'
+    contextPath = ''
+}
+
+test {
+    testLogging {
+        exceptionFormat = 'full'
+    }
+}

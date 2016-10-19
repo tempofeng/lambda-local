@@ -1,0 +1,8 @@
+deployerMainClass=com.zaoo.lambda.example.Deployer
+deployerAwsAccessKeyId=
+deployerAwsSecretAccessKey=
+functionPrefix=lle
+projectName=lambda-local-example
+s3Region=
+s3Bucket=
+s3Dir=lambda-zip/
