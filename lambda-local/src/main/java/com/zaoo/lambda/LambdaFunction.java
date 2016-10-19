@@ -1,5 +1,6 @@
 package com.zaoo.lambda;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
@@ -7,12 +8,12 @@ class LambdaFunction {
     private final String path;
     private final Class handlerClass;
     private final Method handlerMethod;
-    private LambdaRequestDeserializer deserializer;
-    private LambdaResponseSerializer serializer;
+    private final LambdaRequestDeserializer deserializer;
+    private final LambdaResponseSerializer serializer;
 
     public LambdaFunction(String path,
                           Class handlerClass,
-                          Method handlerMethod,
+                          @Nullable Method handlerMethod,
                           LambdaRequestDeserializer deserializer,
                           LambdaResponseSerializer serializer) {
         this.path = path;
@@ -30,12 +31,16 @@ class LambdaFunction {
         return handlerClass;
     }
 
+    /**
+     * @return null if the handler is a RequestHandler class.
+     */
+    @Nullable
     public Method getHandlerMethod() {
         return handlerMethod;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(@Nullable Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         LambdaFunction that = (LambdaFunction) o;

@@ -29,6 +29,26 @@ public class LambdaProxyRequest {
      */
     private String body;
 
+    public LambdaProxyRequest() {
+    }
+
+
+    LambdaProxyRequest(String resource,
+                       String path,
+                       String httpMethod,
+                       Map<String, String> headers,
+                       Map<String, String> queryStringParameters,
+                       RequestContext requestContext,
+                       String body) {
+        this.resource = resource;
+        this.path = path;
+        this.httpMethod = httpMethod;
+        this.headers = headers;
+        this.queryStringParameters = queryStringParameters;
+        this.requestContext = requestContext;
+        this.body = body;
+    }
+
     public String getResource() {
         return resource;
     }
@@ -101,6 +121,16 @@ public class LambdaProxyRequest {
         this.body = body;
     }
 
+    @Override
+    public String toString() {
+        return "LambdaProxyRequest{" +
+                "path='" + path + '\'' +
+                ", httpMethod='" + httpMethod + '\'' +
+                ", queryStringParameters=" + queryStringParameters +
+                ", body='" + body + '\'' +
+                '}';
+    }
+
     public static class RequestContext {
         private String accountId;
         private String resourceId;
@@ -110,6 +140,20 @@ public class LambdaProxyRequest {
         private String resourcePath;
         private String httpMethod;
         private String apiId;
+
+        public RequestContext() {
+        }
+
+        public RequestContext(Identity identity, String resourcePath, String httpMethod) {
+            this.accountId = "EXAMPLE_ACCOUNT_ID";
+            this.resourceId = "EXAMPLE_RESOURCE_ID";
+            this.stage = "EXAMPLE_STAGE";
+            this.requestId = "EXAMPLE_REQUEST_ID";
+            this.identity = identity;
+            this.resourcePath = resourcePath;
+            this.httpMethod = httpMethod;
+            this.apiId = "EXAMPLE_API_ID";
+        }
 
         public String getAccountId() {
             return accountId;
@@ -188,6 +232,23 @@ public class LambdaProxyRequest {
         private String userArn;
         private String userAgent;
         private String user;
+
+        public Identity() {
+        }
+
+        public Identity(String sourceIp, String userAgent) {
+            this.cognitoIdentityPoolId = "EXAMPLE_COGNITO_IDENTITY_POOL_ID";
+            this.accountId = "EXAMPLE_ACCOUNT_ID";
+            this.cognitoIdentityId = "EXAMPLE_COGNITO_IDENTITY_ID";
+            this.caller = "EXAMPLE_CALLER";
+            this.apiKey = "EXAMPLE_API_KEY";
+            this.sourceIp = sourceIp;
+            this.cognitoAuthenticationType = "EXAMPLE_COGNITO_AUTHENTICATION_TYPE";
+            this.cognitoAuthenticationProvider = "EXAMPLE_COGNITO_AUTHENTICATION_PROVIDER";
+            this.userArn = "EXAMPLE_USER_ARN";
+            this.userAgent = userAgent;
+            this.user = "EXAMPLE_USER";
+        }
 
         public String getCognitoIdentityPoolId() {
             return cognitoIdentityPoolId;

@@ -3,6 +3,7 @@ package com.zaoo.lambda;
 import java.util.Collections;
 import java.util.Map;
 
+@SuppressWarnings("unused")
 public class LambdaProxyResponse {
     private int statusCode;
     private Map<String, String> headers;

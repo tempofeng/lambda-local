@@ -1,6 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'war'
-apply from: 'https://raw.github.com/akhikhl/gretty/master/pluginScripts/gretty.plugin'
 
 compileJava {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -12,7 +10,7 @@ dependencies {
     compile rootProject.ext.commonsIO
 
     // reflections
-    compile group: 'org.reflections', name: 'reflections', version: '0.9.10'
+    compile rootProject.ext.reflections
 
     // aws lambda
     compile rootProject.ext.awsLambdaJavaCore
@@ -22,12 +20,17 @@ dependencies {
     compile rootProject.ext.jacksonCore
     compile rootProject.ext.jacksonDatabind
     compile rootProject.ext.jacksonAnnotation
+    compile rootProject.ext.jacksonModuleAfterburner
+
+    // jsr305
+    compile rootProject.ext.jsr305
 
     // slf4j
     compile rootProject.ext.slf4jApi
 
-    // https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api
-    compileOnly group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    // servlet api
+    compileOnly rootProject.ext.servletApi
+    testCompile rootProject.ext.servletApi
 
     // assertj
     testCompile rootProject.ext.assertjCore
@@ -39,5 +42,5 @@ dependencies {
     testCompile rootProject.ext.mockitoCore
 
     // spring-test
-    testCompile 'org.springframework:spring-test:4.3.1.RELEASE'
+    testCompile rootProject.ext.springTest
 }

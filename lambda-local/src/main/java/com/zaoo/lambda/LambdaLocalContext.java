@@ -1,41 +1,37 @@
 package com.zaoo.lambda;
 
-import com.amazonaws.services.lambda.runtime.ClientContext;
-import com.amazonaws.services.lambda.runtime.CognitoIdentity;
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.LambdaLogger;
+import com.amazonaws.services.lambda.runtime.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.Map;
+
+/**
+ *
+ */
 public class LambdaLocalContext implements Context {
     private static final Logger log = LoggerFactory.getLogger(LambdaLocalContext.class);
 
-    private String awsRequestId = "EXAMPLE";
-    private ClientContext clientContext;
-    private String functionName = "EXAMPLE";
-    private CognitoIdentity identity;
-    private String logGroupName = "EXAMPLE";
-    private String logStreamName = "EXAMPLE";
-    private LambdaLogger logger = log::info;
-    private int memoryLimitInMB = 128;
-    private int remainingTimeInMillis = 15000;
+    private final String awsRequestId = "EXAMPLE_REQUEST_ID";
+    private final ClientContext clientContext = new LambdaLocalClientContext();
+    private final String functionName = "EXAMPLE_FUNCTION_NAME";
+    private final CognitoIdentity identity = new LambdaLocalCognitoIdentity();
+    private final String logGroupName = "EXAMPLE_LOG_GROUP_NAME";
+    private final String logStreamName = "EXAMPLE_STREAM_NAME";
+    private final LambdaLogger logger = log::info;
+    private final int memoryLimitInMB = 128;
+    private final int remainingTimeInMillis = 15000;
 
     @Override
     public String getAwsRequestId() {
         return awsRequestId;
     }
 
-    public void setAwsRequestId(String value) {
-        awsRequestId = value;
-    }
-
     @Override
     public ClientContext getClientContext() {
         return clientContext;
-    }
-
-    public void setClientContext(ClientContext value) {
-        clientContext = value;
     }
 
     @Override
@@ -53,17 +49,9 @@ public class LambdaLocalContext implements Context {
         return null;
     }
 
-    public void setFunctionName(String value) {
-        functionName = value;
-    }
-
     @Override
     public CognitoIdentity getIdentity() {
         return identity;
-    }
-
-    public void setIdentity(CognitoIdentity value) {
-        identity = value;
     }
 
     @Override
@@ -71,17 +59,9 @@ public class LambdaLocalContext implements Context {
         return logGroupName;
     }
 
-    public void setLogGroupName(String value) {
-        logGroupName = value;
-    }
-
     @Override
     public String getLogStreamName() {
         return logStreamName;
-    }
-
-    public void setLogStreamName(String value) {
-        logStreamName = value;
     }
 
     @Override
@@ -89,17 +69,9 @@ public class LambdaLocalContext implements Context {
         return logger;
     }
 
-    public void setLogger(LambdaLogger value) {
-        logger = value;
-    }
-
     @Override
     public int getMemoryLimitInMB() {
         return memoryLimitInMB;
-    }
-
-    public void setMemoryLimitInMB(int value) {
-        memoryLimitInMB = value;
     }
 
     @Override
@@ -107,18 +79,72 @@ public class LambdaLocalContext implements Context {
         return remainingTimeInMillis;
     }
 
-    public void setRemainingTimeInMillis(int value) {
-        remainingTimeInMillis = value;
-    }
-
-    /**
-     * A simple {@code LambdaLogger} that prints everything to stderr.
-     */
-    private static class TestLogger implements LambdaLogger {
+    public static class LambdaLocalClientContext implements ClientContext {
+        private final Client client = new LambdaLocalClient();
+        private final Map<String, String> custom = Collections.emptyMap();
+        private final Map<String, String> environment = Collections.emptyMap();
 
         @Override
-        public void log(String message) {
-            System.err.println(message);
+        public Client getClient() {
+            return client;
+        }
+
+        @Override
+        public Map<String, String> getCustom() {
+            return custom;
+        }
+
+        @Override
+        public Map<String, String> getEnvironment() {
+            return environment;
+        }
+    }
+
+    public static class LambdaLocalClient implements Client {
+        private final String installationId = "EXAMPLE_INSTALLATION_ID";
+        private final String appTitle = "EXAMPLE_APP_TITLE";
+        private final String appVersionName = "EXAMPLE_APP_VERSION_NAME";
+        private final String appVersionCode = "EXAMPLE_APP_VERSION_CODE";
+        private final String appPackageName = "EXAMPLE_APP_PACKAGE_NAME";
+
+        @Override
+        public String getInstallationId() {
+            return installationId;
+        }
+
+        @Override
+        public String getAppTitle() {
+            return appTitle;
+        }
+
+        @Override
+        public String getAppVersionName() {
+            return appVersionName;
+        }
+
+        @Override
+        public String getAppVersionCode() {
+            return appVersionCode;
+        }
+
+        @Override
+        public String getAppPackageName() {
+            return appPackageName;
+        }
+    }
+
+    public static class LambdaLocalCognitoIdentity implements CognitoIdentity {
+        private final String identityId = "EXAMPLE_IDENTITY_ID";
+        private final String identityPoolId = "EXAMPLE_IDENTITY_POOL_ID";
+
+        @Override
+        public String getIdentityId() {
+            return identityId;
+        }
+
+        @Override
+        public String getIdentityPoolId() {
+            return identityPoolId;
         }
     }
 }

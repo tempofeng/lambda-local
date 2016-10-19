@@ -15,7 +15,7 @@ public class LambdaFunctionAnnotationScannerTest {
 
     @Before
     public void setUp() throws Exception {
-            scanner = new LambdaFunctionAnnotationScanner();
+        scanner = new LambdaFunctionAnnotationScanner();
     }
 
 
@@ -31,7 +31,7 @@ public class LambdaFunctionAnnotationScannerTest {
         Class<?> handlerClass = Class.forName("com.zaoo.lambda.test.TestFunction2");
         LambdaFunction lambdaFunction2 = new LambdaFunction("/testPath2",
                 handlerClass,
-                ReflectionUtils.getMethods(handlerClass, method -> method.getName().equals("method1")).stream()
+                ReflectionUtils.getMethods(handlerClass, method -> "method1".equals(method.getName())).stream()
                         .findFirst()
                         .get(),
                 deserializer,
@@ -39,7 +39,7 @@ public class LambdaFunctionAnnotationScannerTest {
         handlerClass = Class.forName("com.zaoo.lambda.test.TestFunction2");
         LambdaFunction lambdaFunction3 = new LambdaFunction("/testPath3",
                 handlerClass,
-                ReflectionUtils.getMethods(handlerClass, method -> method.getName().equals("method2")).stream()
+                ReflectionUtils.getMethods(handlerClass, method -> "method2".equals(method.getName())).stream()
                         .findFirst()
                         .get(),
                 deserializer,
@@ -72,7 +72,7 @@ public class LambdaFunctionAnnotationScannerTest {
         Class<?> handlerClass = TestFunction2.class;
         assertThat(lambdaFunction).isEqualTo(new LambdaFunction("/testPath2",
                 handlerClass,
-                ReflectionUtils.getMethods(handlerClass, method -> method.getName().equals("method1")).stream()
+                ReflectionUtils.getMethods(handlerClass, method -> "method1".equals(method.getName())).stream()
                         .findFirst()
                         .get(),
                 new LambdaProxyRequestDeserializer(),

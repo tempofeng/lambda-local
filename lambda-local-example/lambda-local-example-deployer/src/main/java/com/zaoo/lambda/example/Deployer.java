@@ -9,7 +9,7 @@ import com.amazonaws.services.lambda.model.FunctionConfiguration;
 import com.amazonaws.services.lambda.model.UpdateFunctionCodeRequest;
 import com.amazonaws.services.s3.transfer.TransferManager;
 import com.amazonaws.services.s3.transfer.Upload;
-import com.zaoo.puu.BuildConfig;
+import com.zaoo.lambdalocal.BuildConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,8 @@ public class Deployer {
                 BuildConfig.projectName,
                 BuildConfig.s3Region,
                 BuildConfig.s3Bucket,
-                BuildConfig.s3Dir);
+                BuildConfig.s3Dir,
+                BuildConfig.versionName);
         deployer.deploy();
         System.exit(0);
     }
@@ -44,7 +45,8 @@ public class Deployer {
                     String projectName,
                     String s3Region,
                     String s3Bucket,
-                    String s3Dir) {
+                    String s3Dir,
+                    String versionName) {
         final BasicAWSCredentials credentials = new BasicAWSCredentials(deployerAwsAccessKeyId,
                 deployerAwsSecretAccessKey);
         transferManager = createTransferManager(credentials);
@@ -52,7 +54,7 @@ public class Deployer {
         this.functionPrefix = functionPrefix;
         this.s3Bucket = s3Bucket;
         s3Key = generateS3Key(s3Dir, projectName);
-        zipPath = getZipPath(projectName);
+        zipPath = getZipPath(projectName, versionName);
     }
 
     private TransferManager createTransferManager(BasicAWSCredentials credentials) {
@@ -69,8 +71,8 @@ public class Deployer {
         return String.format("%s%s-%s.zip", s3Dir.endsWith("/") ? s3Dir : s3Dir + "/", projectName, UUID.randomUUID());
     }
 
-    private File getZipPath(String projectName) {
-        return new File(String.format("../build/distributions/%s.zip", projectName));
+    private File getZipPath(String projectName, Object versionName) {
+        return new File(String.format("../build/distributions/%s-%s.zip", projectName, versionName));
     }
 
     public void deploy() throws InterruptedException {
@@ -79,7 +81,7 @@ public class Deployer {
     }
 
     private void uploadZipToS3() throws AmazonClientException, InterruptedException {
-        log.info("uploadZipToS3:{}->{}", zipPath, s3Key);
+        log.info("uploadZipToS3:{} -> {}", zipPath, s3Key);
 
         Upload upload = transferManager.upload(s3Bucket,
                 s3Key,

@@ -5,6 +5,7 @@ import com.zaoo.lambda.LambdaProxyRequest;
 import com.zaoo.lambda.rest.*;
 
 @LambdaLocal(path = "/helloRestService")
+@SuppressWarnings("unused")
 public class HelloRestService extends AbstractLambdaRestService {
 
     @RestMethod(HttpMethod.POST)
@@ -17,14 +18,14 @@ public class HelloRestService extends AbstractLambdaRestService {
     public HelloPojo.ResponseClass helloWithRequest(@RestQuery("firstName") String firstName,
                                                     @RestQuery("lastName") String lastName,
                                                     LambdaProxyRequest request) {
-        String greetingString = String.format("Hello %s, %s from %s",
+        String greetingString = String.format("Hello %s, %s from %s!",
                 firstName,
                 lastName,
                 request.getRequestContext().getIdentity().getSourceIp());
         return new HelloPojo.ResponseClass(greetingString);
     }
 
-    public static class RequestClass {
+    static class RequestClass {
         String firstName;
         String lastName;
 
@@ -44,16 +45,16 @@ public class HelloRestService extends AbstractLambdaRestService {
             this.lastName = lastName;
         }
 
-        public RequestClass(String firstName, String lastName) {
+        RequestClass(String firstName, String lastName) {
             this.firstName = firstName;
             this.lastName = lastName;
         }
 
-        public RequestClass() {
+        RequestClass() {
         }
     }
 
-    public static class ResponseClass {
+    static class ResponseClass {
         String greetings;
 
         public String getGreetings() {
@@ -64,11 +65,11 @@ public class HelloRestService extends AbstractLambdaRestService {
             this.greetings = greetings;
         }
 
-        public ResponseClass(String greetings) {
+        ResponseClass(String greetings) {
             this.greetings = greetings;
         }
 
-        public ResponseClass() {
+        ResponseClass() {
         }
     }
 }

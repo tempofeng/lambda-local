@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 
 @LambdaLocal(path = "/helloLambdaProxy")
+@SuppressWarnings("unused")
 public class HelloLambdaProxy implements RequestHandler<LambdaProxyRequest, LambdaProxyResponse> {
     private static final Logger log = LoggerFactory.getLogger(HelloLambdaProxy.class);
 

@@ -8,29 +8,28 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class LambdaProxyRequestDeserializer implements LambdaRequestDeserializer<LambdaProxyRequest> {
+    private static final String UTF_8 = "UTF-8";
+    private static final String USER_AGENT = "User-Agent";
+
     @Override
     public LambdaProxyRequest serialize(HttpServletRequest req) throws IOException {
         String requestPath = req.getRequestURI().substring(req.getContextPath().length());
 
-        LambdaProxyRequest.Identity identity = new LambdaProxyRequest.Identity();
-        identity.setSourceIp(req.getRemoteAddr());
-        identity.setUserAgent(req.getHeader("User-Agent"));
+        LambdaProxyRequest.Identity identity = new LambdaProxyRequest.Identity(req.getRemoteAddr(),
+                req.getHeader(USER_AGENT));
 
-        LambdaProxyRequest.RequestContext requestContext = new LambdaProxyRequest.RequestContext();
-        requestContext.setIdentity(identity);
-        requestContext.setResourcePath(requestPath);
-        requestContext.setHttpMethod(req.getMethod());
+        LambdaProxyRequest.RequestContext requestContext = new LambdaProxyRequest.RequestContext(identity,
+                requestPath,
+                req.getMethod());
 
-        LambdaProxyRequest input = new LambdaProxyRequest();
-        input.setResource(requestPath);
-        input.setPath(requestPath);
-        input.setHttpMethod(req.getMethod());
-        input.setHeaders(toHeaders(req));
-        input.setQueryStringParameters(toParameters(req));
-        input.setRequestContext(requestContext);
-        input.setBody(IOUtils.toString(req.getInputStream(),
-                req.getCharacterEncoding() != null ? req.getCharacterEncoding() : "UTF-8"));
-        return input;
+        return new LambdaProxyRequest(requestPath,
+                requestPath,
+                req.getMethod(),
+                toHeaders(req),
+                toParameters(req),
+                requestContext,
+                IOUtils.toString(req.getInputStream(),
+                        req.getCharacterEncoding() != null ? req.getCharacterEncoding() : UTF_8));
     }
 
     private Map<String, String> toHeaders(HttpServletRequest req) {

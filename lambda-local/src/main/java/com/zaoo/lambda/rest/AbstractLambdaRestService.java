@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaoo.lambda.LambdaProxyRequest;
 import com.zaoo.lambda.LambdaProxyResponse;
+import com.zaoo.lambda.ObjectMappers;
 import org.reflections.ReflectionUtils;
 
 import java.io.IOException;
@@ -18,7 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class AbstractLambdaRestService implements RequestHandler<LambdaProxyRequest, LambdaProxyResponse> {
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.getInstance();
     private final Map<HttpMethod, MethodInvoker> methodInvokers;
 
     public AbstractLambdaRestService() {
@@ -42,13 +43,13 @@ public abstract class AbstractLambdaRestService implements RequestHandler<Lambda
 
         try {
             Object result = methodInvoker.invoke(this, input);
-            return new LambdaProxyResponse(objectMapper.writeValueAsString(result));
+            return new LambdaProxyResponse(OBJECT_MAPPER.writeValueAsString(result));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
             try {
                 Error error = new Error(e.getLocalizedMessage(), e);
-                return new LambdaProxyResponse(500, Collections.emptyMap(), objectMapper.writeValueAsString(error));
+                return new LambdaProxyResponse(500, Collections.emptyMap(), OBJECT_MAPPER.writeValueAsString(error));
             } catch (JsonProcessingException jpe) {
                 throw new RuntimeException(jpe);
             }
@@ -56,10 +57,10 @@ public abstract class AbstractLambdaRestService implements RequestHandler<Lambda
     }
 
     private static class MethodInvoker {
-        private Method method;
-        private List<ArgRetriever> argRetrievers = new ArrayList<>();
+        private final Method method;
+        private final List<ArgRetriever> argRetrievers = new ArrayList<>();
 
-        public MethodInvoker(Method method) {
+        MethodInvoker(Method method) {
             this.method = method;
 
             Parameter[] parameters = method.getParameters();
@@ -83,10 +84,11 @@ public abstract class AbstractLambdaRestService implements RequestHandler<Lambda
             return annotation instanceof RestQuery || annotation instanceof RestHeader || annotation instanceof RestBody;
         }
 
-        public Object invoke(Object obj, LambdaProxyRequest request) throws InvocationTargetException {
+        Object invoke(Object obj, LambdaProxyRequest request) throws InvocationTargetException {
             try {
-                List<Object> args = argRetrievers.stream().map(argRetriever -> argRetriever.retrieve(request)).collect(
-                        Collectors.toList());
+                List<Object> args = argRetrievers.stream()
+                        .map(argRetriever -> argRetriever.retrieve(request))
+                        .collect(Collectors.toList());
                 return method.invoke(obj, args.toArray());
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
@@ -95,17 +97,17 @@ public abstract class AbstractLambdaRestService implements RequestHandler<Lambda
     }
 
     private static class ArgRetriever {
-        private ArgRetrieverType type;
-        private Parameter parameter;
-        private Annotation annotation;
+        private final ArgRetrieverType type;
+        private final Parameter parameter;
+        private final Annotation annotation;
 
-        public ArgRetriever(ArgRetrieverType type, Parameter parameter, Annotation annotation) {
+        ArgRetriever(ArgRetrieverType type, Parameter parameter, Annotation annotation) {
             this.type = type;
             this.parameter = parameter;
             this.annotation = annotation;
         }
 
-        public Object retrieve(LambdaProxyRequest request) {
+        Object retrieve(LambdaProxyRequest request) {
             switch (type) {
                 case ANNOTATION:
                     if (annotation instanceof RestQuery) {
@@ -134,7 +136,7 @@ public abstract class AbstractLambdaRestService implements RequestHandler<Lambda
                         }
 
                         try {
-                            return objectMapper.readValue(request.getBody(), parameter.getType());
+                            return OBJECT_MAPPER.readValue(request.getBody(), parameter.getType());
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
@@ -149,12 +151,12 @@ public abstract class AbstractLambdaRestService implements RequestHandler<Lambda
         }
     }
 
-    public static class Error {
+    static class Error {
         public String message;
         @JsonProperty(value = "exception")
         public String exceptionClass;
 
-        public Error(String message, Throwable t) {
+        Error(String message, Throwable t) {
             this.message = message;
             this.exceptionClass = t.getClass().getName();
         }

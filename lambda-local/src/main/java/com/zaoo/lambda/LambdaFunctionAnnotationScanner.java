@@ -2,10 +2,10 @@ package com.zaoo.lambda;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -18,25 +18,25 @@ public class LambdaFunctionAnnotationScanner {
                 .collect(Collectors.toList());
     }
 
-    private LambdaRequestDeserializer createDeserializer(Class<? extends LambdaRequestDeserializer<?>> cls) {
+    private LambdaRequestDeserializer createDeserializer(@Nullable Class<? extends LambdaRequestDeserializer<?>> cls) {
         if (cls == null) {
             return new LambdaProxyRequestDeserializer();
         }
         try {
             return cls.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
-            throw new IllegalArgumentException("Unable to create LambdaRequestDeserializer:" + cls, e);
+            throw new IllegalArgumentException("Unable to create:" + cls, e);
         }
     }
 
-    private LambdaResponseSerializer createSerializer(Class<? extends LambdaResponseSerializer<?>> cls) {
+    private LambdaResponseSerializer createSerializer(@Nullable Class<? extends LambdaResponseSerializer<?>> cls) {
         if (cls == null) {
             return new LambdaProxyResponseSerializer();
         }
         try {
             return cls.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
-            throw new IllegalArgumentException("Unable to create LambdaResponseSerializer:" + cls, e);
+            throw new IllegalArgumentException("Unable to create:" + cls, e);
         }
     }
 
@@ -74,12 +74,12 @@ public class LambdaFunctionAnnotationScanner {
 
         if (handlers.length != deserializer.length) {
             throw new IllegalArgumentException(
-                    "For class annotated with @LambdaLocal, the length of path array must be equal to the length of handler array:" + cls.getName());
+                    "For class annotated with @LambdaLocal, the length of deserializer array must be equal to the length of handler array:" + cls.getName());
         }
 
         if (handlers.length != serializer.length) {
             throw new IllegalArgumentException(
-                    "For class annotated with @LambdaLocal, the length of path array must be equal to the length of handler array:" + cls.getName());
+                    "For class annotated with @LambdaLocal, the length of serializer array must be equal to the length of handler array:" + cls.getName());
         }
 
         List<LambdaFunction> lambdaFunctions = new ArrayList<>(paths.length);
@@ -100,7 +100,7 @@ public class LambdaFunctionAnnotationScanner {
         try {
             if (!handler.contains("::")) {
                 Class<?> handlerClass = Class.forName(handler);
-                if (ReflectionUtils.getAllSuperTypes(handlerClass, cls -> cls.equals(RequestHandler.class)).isEmpty()) {
+                if (ReflectionUtils.getAllSuperTypes(handlerClass, RequestHandler.class::equals).isEmpty()) {
                     throw new IllegalArgumentException("handler must implement RequestHandler or RequestStreamHandler:" + handler);
                 }
 

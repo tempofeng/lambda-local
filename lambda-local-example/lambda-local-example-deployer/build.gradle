@@ -47,4 +47,5 @@ buildConfig {
     buildConfigField 'String', 's3Region', s3Region
     buildConfigField 'String', 's3Bucket', s3Bucket
     buildConfigField 'String', 's3Dir', s3Dir
+    buildConfigField 'String', 'versionName', VERSION_NAME
 }
