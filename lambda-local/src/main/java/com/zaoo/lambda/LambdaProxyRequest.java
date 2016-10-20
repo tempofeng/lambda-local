@@ -1,12 +1,15 @@
 package com.zaoo.lambda;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Map;
 
 @SuppressWarnings("unused")
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LambdaProxyRequest {
     private String resource;
     private String path;
@@ -22,7 +25,7 @@ public class LambdaProxyRequest {
     private Map<String, String> pathParameters = Collections.emptyMap();
     private Map<String, String> stageVariables = Collections.emptyMap();
     private RequestContext requestContext;
-    private String body = "";
+    private String body;
 
     public LambdaProxyRequest() {
     }
@@ -72,7 +75,10 @@ public class LambdaProxyRequest {
         return headers;
     }
 
-    public void setHeaders(Map<String, String> headers) {
+    public void setHeaders(@Nullable Map<String, String> headers) {
+        if (headers == null) {
+            return;
+        }
         this.headers = headers;
     }
 
@@ -80,7 +86,10 @@ public class LambdaProxyRequest {
         return queryStringParameters;
     }
 
-    public void setQueryStringParameters(Map<String, String> queryStringParameters) {
+    public void setQueryStringParameters(@Nullable Map<String, String> queryStringParameters) {
+        if (queryStringParameters == null) {
+            return;
+        }
         this.queryStringParameters = queryStringParameters;
     }
 
@@ -88,7 +97,10 @@ public class LambdaProxyRequest {
         return pathParameters;
     }
 
-    public void setPathParameters(Map<String, String> pathParameters) {
+    public void setPathParameters(@Nullable Map<String, String> pathParameters) {
+        if (pathParameters == null) {
+            return;
+        }
         this.pathParameters = pathParameters;
     }
 
@@ -96,7 +108,10 @@ public class LambdaProxyRequest {
         return stageVariables;
     }
 
-    public void setStageVariables(Map<String, String> stageVariables) {
+    public void setStageVariables(@Nullable Map<String, String> stageVariables) {
+        if (stageVariables == null) {
+            return;
+        }
         this.stageVariables = stageVariables;
     }
 
@@ -112,7 +127,7 @@ public class LambdaProxyRequest {
         return body;
     }
 
-    public void setBody(String body) {
+    public void setBody(@Nullable String body) {
         this.body = body;
     }
 
@@ -127,6 +142,7 @@ public class LambdaProxyRequest {
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class RequestContext {
         private String accountId;
         private String resourceId;
@@ -217,6 +233,7 @@ public class LambdaProxyRequest {
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Identity {
         private String cognitoIdentityPoolId;
         private String accountId;
@@ -251,7 +268,7 @@ public class LambdaProxyRequest {
             return cognitoIdentityPoolId;
         }
 
-        public void setCognitoIdentityPoolId(String cognitoIdentityPoolId) {
+        public void setCognitoIdentityPoolId(@Nullable String cognitoIdentityPoolId) {
             this.cognitoIdentityPoolId = cognitoIdentityPoolId;
         }
 
@@ -267,7 +284,7 @@ public class LambdaProxyRequest {
             return cognitoIdentityId;
         }
 
-        public void setCognitoIdentityId(String cognitoIdentityId) {
+        public void setCognitoIdentityId(@Nullable String cognitoIdentityId) {
             this.cognitoIdentityId = cognitoIdentityId;
         }
 
@@ -299,7 +316,7 @@ public class LambdaProxyRequest {
             return cognitoAuthenticationType;
         }
 
-        public void setCognitoAuthenticationType(String cognitoAuthenticationType) {
+        public void setCognitoAuthenticationType(@Nullable String cognitoAuthenticationType) {
             this.cognitoAuthenticationType = cognitoAuthenticationType;
         }
 
@@ -307,7 +324,7 @@ public class LambdaProxyRequest {
             return cognitoAuthenticationProvider;
         }
 
-        public void setCognitoAuthenticationProvider(String cognitoAuthenticationProvider) {
+        public void setCognitoAuthenticationProvider(@Nullable String cognitoAuthenticationProvider) {
             this.cognitoAuthenticationProvider = cognitoAuthenticationProvider;
         }
 
