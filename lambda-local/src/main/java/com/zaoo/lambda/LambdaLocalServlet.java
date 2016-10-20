@@ -1,14 +1,16 @@
 package com.zaoo.lambda;
 
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -59,8 +61,20 @@ public class LambdaLocalServlet extends HttpServlet {
                               LambdaFunction lambdaFunction) throws InstantiationException, IllegalAccessException, IOException, InvocationTargetException {
         Object handler = getLambdaFunctionObj(lambdaFunction);
         LambdaLocalContext context = new LambdaLocalContext();
-
         Object input = lambdaFunction.getDeserializer().serialize(req);
+
+        if (handler instanceof RequestStreamHandler) {
+            RequestStreamHandler streamHandler = (RequestStreamHandler) handler;
+            byte[] buffer = (byte[]) input;
+            try (ByteArrayInputStream in = new ByteArrayInputStream(buffer);
+                 ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                streamHandler.handleRequest(in, out, context);
+                out.flush();
+                lambdaFunction.getSerializer().deserialize(out.toByteArray(), resp);
+            }
+            return;
+        }
+
         if (handler instanceof RequestHandler) {
             RequestHandler requestHandler = (RequestHandler) handler;
             Object output = requestHandler.handleRequest(input, context);

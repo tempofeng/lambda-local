@@ -17,7 +17,6 @@ public class HelloLambdaProxy extends AbstractLambdaLocalRequestHandler {
     public LambdaProxyResponse handleRequest(LambdaProxyRequest input, Context context) {
         String firstName = input.getQueryStringParameters().get("firstName");
         String lastName = input.getQueryStringParameters().get("lastName");
-        log.info("firstName={},lastName={}", firstName, lastName);
         return new LambdaProxyResponse(String.format("Hello! %s,%s", firstName, lastName));
     }
 }

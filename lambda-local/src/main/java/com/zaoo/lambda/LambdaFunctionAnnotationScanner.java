@@ -2,6 +2,7 @@ package com.zaoo.lambda;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
 
@@ -18,9 +19,14 @@ public class LambdaFunctionAnnotationScanner {
                 .collect(Collectors.toList());
     }
 
-    private LambdaRequestDeserializer createDeserializer(@Nullable Class<? extends LambdaRequestDeserializer<?>> cls) {
+    private LambdaRequestDeserializer createDeserializer(Class<?> handlerClass,
+                                                         @Nullable Class<? extends LambdaRequestDeserializer<?>> cls) {
         if (cls == null) {
-            return new LambdaProxyRequestDeserializer();
+            if (RequestStreamHandler.class.isAssignableFrom(handlerClass)) {
+                return new LambdaProxyRequestStreamDeserializer();
+            } else {
+                return new LambdaProxyRequestDeserializer();
+            }
         }
         try {
             return cls.newInstance();
@@ -29,9 +35,14 @@ public class LambdaFunctionAnnotationScanner {
         }
     }
 
-    private LambdaResponseSerializer createSerializer(@Nullable Class<? extends LambdaResponseSerializer<?>> cls) {
+    private LambdaResponseSerializer createSerializer(Class<?> handlerClass,
+                                                      @Nullable Class<? extends LambdaResponseSerializer<?>> cls) {
         if (cls == null) {
-            return new LambdaProxyResponseSerializer();
+            if (RequestStreamHandler.class.isAssignableFrom(handlerClass)) {
+                return new LambdaProxyResponseStreamSerializer();
+            } else {
+                return new LambdaProxyResponseSerializer();
+            }
         }
         try {
             return cls.newInstance();
@@ -100,15 +111,17 @@ public class LambdaFunctionAnnotationScanner {
         try {
             if (!handler.contains("::")) {
                 Class<?> handlerClass = Class.forName(handler);
-                if (ReflectionUtils.getAllSuperTypes(handlerClass, RequestHandler.class::equals).isEmpty()) {
+                if (ReflectionUtils.getAllSuperTypes(handlerClass,
+                        cls -> RequestHandler.class.equals(cls) || RequestStreamHandler.class.equals(cls))
+                        .isEmpty()) {
                     throw new IllegalArgumentException("handler must implement RequestHandler or RequestStreamHandler:" + handler);
                 }
 
                 return new LambdaFunction(path,
                         handlerClass,
                         null,
-                        createDeserializer(deserializerClass),
-                        createSerializer(serializerClass));
+                        createDeserializer(handlerClass, deserializerClass),
+                        createSerializer(handlerClass, serializerClass));
             }
 
             String[] split = handler.split("::");
@@ -130,8 +143,8 @@ public class LambdaFunctionAnnotationScanner {
             return new LambdaFunction(path,
                     handlerClass,
                     methods.stream().findFirst().get(),
-                    createDeserializer(deserializerClass),
-                    createSerializer(serializerClass));
+                    createDeserializer(handlerClass, deserializerClass),
+                    createSerializer(handlerClass, serializerClass));
         } catch (ClassNotFoundException e) {
             throw new IllegalArgumentException("Unable to create new instance of Handler:" + handler, e);
         }
