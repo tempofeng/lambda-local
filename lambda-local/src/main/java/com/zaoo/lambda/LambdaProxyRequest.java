@@ -1,5 +1,6 @@
 package com.zaoo.lambda;
 
+import java.util.Collections;
 import java.util.Map;
 
 @SuppressWarnings("unused")
@@ -8,30 +9,20 @@ public class LambdaProxyRequest {
     private String path;
     private String httpMethod;
     /**
-     * Might be null. If there is more than one header with the same name, we will pick the last one. (like API Gateway)
+     * If there is more than one header with the same name, we will pick the last one. (like API Gateway)
      */
-    private Map<String, String> headers;
+    private Map<String, String> headers = Collections.emptyMap();
     /**
-     * Might be null. If there is more than one queryString parameter with the same name, we will pick the last one. (like API Gateway)
+     * If there is more than one queryString parameter with the same name, we will pick the last one. (like API Gateway)
      */
-    private Map<String, String> queryStringParameters;
-    /**
-     * Might be null.
-     */
-    private Map<String, String> pathParameters;
-    /**
-     * Might be null.
-     */
-    private Map<String, String> stageVariables;
+    private Map<String, String> queryStringParameters = Collections.emptyMap();
+    private Map<String, String> pathParameters = Collections.emptyMap();
+    private Map<String, String> stageVariables = Collections.emptyMap();
     private RequestContext requestContext;
-    /**
-     * Might be null.
-     */
-    private String body;
+    private String body = "";
 
     public LambdaProxyRequest() {
     }
-
 
     LambdaProxyRequest(String resource,
                        String path,
