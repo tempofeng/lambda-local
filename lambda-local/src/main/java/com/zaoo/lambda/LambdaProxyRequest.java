@@ -1,9 +1,12 @@
 package com.zaoo.lambda;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Collections;
 import java.util.Map;
 
 @SuppressWarnings("unused")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class LambdaProxyRequest {
     private String resource;
     private String path;
@@ -23,6 +26,7 @@ public class LambdaProxyRequest {
 
     public LambdaProxyRequest() {
     }
+
 
     LambdaProxyRequest(String resource,
                        String path,
@@ -122,6 +126,7 @@ public class LambdaProxyRequest {
                 '}';
     }
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class RequestContext {
         private String accountId;
         private String resourceId;
@@ -211,6 +216,7 @@ public class LambdaProxyRequest {
         }
     }
 
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class Identity {
         private String cognitoIdentityPoolId;
         private String accountId;

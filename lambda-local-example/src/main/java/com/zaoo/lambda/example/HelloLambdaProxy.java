@@ -2,6 +2,7 @@ package com.zaoo.lambda.example;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.zaoo.lambda.AbstractLambdaLocalRequestHandler;
 import com.zaoo.lambda.LambdaLocal;
 import com.zaoo.lambda.LambdaProxyRequest;
 import com.zaoo.lambda.LambdaProxyResponse;
@@ -12,7 +13,7 @@ import java.util.Collections;
 
 @LambdaLocal(path = "/helloLambdaProxy")
 @SuppressWarnings("unused")
-public class HelloLambdaProxy implements RequestHandler<LambdaProxyRequest, LambdaProxyResponse> {
+public class HelloLambdaProxy extends AbstractLambdaLocalRequestHandler {
     private static final Logger log = LoggerFactory.getLogger(HelloLambdaProxy.class);
 
     @Override
