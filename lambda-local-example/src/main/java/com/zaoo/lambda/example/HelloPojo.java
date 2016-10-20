@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@LambdaLocal(path = "/helloPojo", serializer = HelloPojo.Serializer.class, deserializer = HelloPojo.Deserializer.class)
+@LambdaLocal(value = "/helloPojo", serializer = HelloPojo.Serializer.class, deserializer = HelloPojo.Deserializer.class)
 @SuppressWarnings("unused")
 public class HelloPojo implements RequestHandler<HelloPojo.RequestClass, HelloPojo.ResponseClass> {
 

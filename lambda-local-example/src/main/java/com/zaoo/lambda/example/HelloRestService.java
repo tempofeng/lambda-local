@@ -4,7 +4,7 @@ import com.zaoo.lambda.LambdaLocal;
 import com.zaoo.lambda.LambdaProxyRequest;
 import com.zaoo.lambda.rest.*;
 
-@LambdaLocal(path = "/helloRestService")
+@LambdaLocal("/helloRestService")
 @SuppressWarnings("unused")
 public class HelloRestService extends AbstractLambdaRestService {
 

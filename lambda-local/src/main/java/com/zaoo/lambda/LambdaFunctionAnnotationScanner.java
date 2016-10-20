@@ -42,7 +42,7 @@ public class LambdaFunctionAnnotationScanner {
 
     private List<LambdaFunction> listLambdaFunctionFromAnotatedClass(Class<?> cls) {
         LambdaLocal lambdaLocal = cls.getAnnotation(LambdaLocal.class);
-        String[] paths = lambdaLocal.path();
+        String[] paths = lambdaLocal.value();
         String[] handlers = lambdaLocal.handler();
         Class<? extends LambdaRequestDeserializer<?>>[] deserializer = lambdaLocal.deserializer();
         Class<? extends LambdaResponseSerializer<?>>[] serializer = lambdaLocal.serializer();

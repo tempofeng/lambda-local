@@ -5,7 +5,7 @@ import com.zaoo.lambda.LambdaProxyRequestDeserializer;
 import com.zaoo.lambda.LambdaProxyResponseSerializer;
 import com.zaoo.lambda.LambdaLocal;
 
-@LambdaLocal(path = {"/testPath2", "/testPath3"},
+@LambdaLocal(value = {"/testPath2", "/testPath3"},
         handler = {"com.zaoo.lambda.test.TestFunction2::method1", "com.zaoo.lambda.test.TestFunction2::method2"},
         deserializer = {LambdaProxyRequestDeserializer.class, LambdaProxyRequestDeserializer.class},
         serializer = {LambdaProxyResponseSerializer.class, LambdaProxyResponseSerializer.class})

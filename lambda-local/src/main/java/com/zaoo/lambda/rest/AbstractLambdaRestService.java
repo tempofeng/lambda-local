@@ -5,6 +5,7 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.zaoo.lambda.AbstractLambdaLocalRequestHandler;
 import com.zaoo.lambda.LambdaProxyRequest;
 import com.zaoo.lambda.LambdaProxyResponse;
 import com.zaoo.lambda.ObjectMappers;
@@ -18,7 +19,7 @@ import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public abstract class AbstractLambdaRestService implements RequestHandler<LambdaProxyRequest, LambdaProxyResponse> {
+public abstract class AbstractLambdaRestService extends AbstractLambdaLocalRequestHandler {
     private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.getInstance();
     private final Map<HttpMethod, MethodInvoker> methodInvokers;
 
