@@ -11,4 +11,6 @@ public @interface RestHeader {
     String value();
 
     boolean required() default true;
+
+    Class<? extends RestParamDeserializer<?>> deserializer() default DefaultRestParamDeserializer.class;
 }

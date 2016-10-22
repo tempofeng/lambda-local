@@ -28,14 +28,13 @@ import static java.util.stream.Collectors.toList;
 public abstract class AbstractLambdaRestService extends AbstractLambdaLocalRequestHandler {
     private final Map<HttpMethod, MethodInvoker> methodInvokers;
     private final ObjectMapper objectMapper = ObjectMappers.getInstance();
-    private final RestParamDeserializerFactory restParamDeserializerFactory = new RestParamDeserializerFactory();
 
     public AbstractLambdaRestService() {
         methodInvokers = ReflectionUtils.getMethods(getClass(),
                 ReflectionUtils.withAnnotation(RestMethod.class)).stream()
                 .collect(Collectors.toMap(
                         method -> method.getAnnotation(RestMethod.class).value(),
-                        method -> new MethodInvoker(objectMapper, restParamDeserializerFactory, method)));
+                        method -> new MethodInvoker(objectMapper, method)));
     }
 
     @Override
@@ -68,9 +67,7 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
         private final Method method;
         private final List<ArgRetriever> argRetrievers = new ArrayList<>();
 
-        MethodInvoker(ObjectMapper objectMapper,
-                      RestParamDeserializerFactory restParamDeserializerFactory,
-                      Method method) {
+        MethodInvoker(ObjectMapper objectMapper, Method method) {
             this.method = method;
 
             Parameter[] parameters = method.getParameters();
@@ -79,13 +76,12 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
                 Parameter parameter = parameters[i];
                 Annotation[] annotations = parameterAnnotations[i];
                 Optional<Annotation> opt = Arrays.stream(annotations).filter(this::isRestAnnotation).findFirst();
-
                 if (opt.isPresent()) {
-                    RestParamDeserializer restParamDeserializer = isRestParamDeserializable(opt.get()) ?
-                            restParamDeserializerFactory.getDeserializer(parameter.getType()) : null;
+                    Annotation annotation = opt.get();
+                    RestParamDeserializer restParamDeserializer = createDeserializer(annotation);
                     argRetrievers.add(new ArgRetriever(objectMapper, ArgRetrieverType.ANNOTATION,
                             parameter,
-                            opt.get(),
+                            annotation,
                             restParamDeserializer
                     ));
                 } else if (parameter.getType().isAssignableFrom(LambdaProxyRequest.class)) {
@@ -105,12 +101,6 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
             return annotation instanceof RestQuery ||
                     annotation instanceof RestHeader ||
                     annotation instanceof RestBody ||
-                    annotation instanceof RestForm;
-        }
-
-        private boolean isRestParamDeserializable(Annotation annotation) {
-            return annotation instanceof RestQuery ||
-                    annotation instanceof RestHeader ||
                     annotation instanceof RestForm;
         }
 
@@ -138,6 +128,40 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
             return URLEncodedUtils.parse(request.getBody(), Charset.forName("UTF-8")).stream()
                     .collect(Collectors.toMap(NameValuePair::getName, NameValuePair::getValue));
         }
+
+        private RestParamDeserializer createDeserializer(Annotation annotation) {
+            if (annotation instanceof RestQuery) {
+                RestQuery restQuery = (RestQuery) annotation;
+                return createDeserializer(restQuery.deserializer());
+            }
+
+            if (annotation instanceof RestForm) {
+                RestForm restForm = (RestForm) annotation;
+                return createDeserializer(restForm.deserializer());
+            }
+
+            if (annotation instanceof RestHeader) {
+                RestHeader restHeader = (RestHeader) annotation;
+                return createDeserializer(restHeader.deserializer());
+            }
+
+            return new ErrorRestParamDeserializer();
+        }
+
+        private RestParamDeserializer createDeserializer(Class<? extends RestParamDeserializer<?>> deserializer) {
+            try {
+                return deserializer.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    public static class ErrorRestParamDeserializer implements RestParamDeserializer<Object> {
+        @Override
+        public Object deserialize(String str, Class<?> cls) {
+            throw new IllegalArgumentException("Unable to get RestParamDeserializer of this type:" + cls);
+        }
     }
 
     private static class ArgRetriever {
@@ -151,7 +175,7 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
                      ArgRetrieverType type,
                      Parameter parameter,
                      @Nullable Annotation annotation,
-                     @Nullable RestParamDeserializer<?> restParamDeserializer) {
+                     RestParamDeserializer<?> restParamDeserializer) {
             this.type = type;
             this.parameter = parameter;
             this.annotation = annotation;

@@ -1,7 +1,32 @@
 package com.zaoo.lambda.rest;
 
-public class RestParamDeserializerFactory {
-    public RestParamDeserializer getDeserializer(Class<?> cls) {
+import java.lang.annotation.Annotation;
+
+public class RestParamDeserializerFactory implements RestParamDeserializer<Object> {
+
+
+    public RestParamDeserializer getDeserializer(Class<?> cls, Annotation annotation) {
+        if (annotation instanceof RestQuery) {
+            RestQuery restQuery = (RestQuery) annotation;
+            if (restQuery.deserializer() != null) {
+                return createDeserializer(restQuery.deserializer());
+            }
+        }
+
+        if (annotation instanceof RestForm) {
+            RestForm restForm = (RestForm) annotation;
+            if (restForm.deserializer() != null) {
+                return createDeserializer(restForm.deserializer());
+            }
+        }
+
+        if (annotation instanceof RestHeader) {
+            RestHeader restHeader = (RestHeader) annotation;
+            if (restHeader.deserializer() != null) {
+                return createDeserializer(restHeader.deserializer());
+            }
+        }
+
         if (String.class.isAssignableFrom(cls)) {
             return new StringRestParamDeserializer();
         }
@@ -23,7 +48,21 @@ public class RestParamDeserializerFactory {
         if (Enum.class.isAssignableFrom(cls)) {
             return new EnumRestParamDeserializer();
         }
+
         throw new IllegalArgumentException("Unable to get RestParamDeserializer of this type:" + cls);
+    }
+
+    private RestParamDeserializer createDeserializer(Class<? extends RestParamDeserializer<?>> deserializer) {
+        try {
+            return deserializer.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Object deserialize(String str, Class<?> cls) {
+        return null;
     }
 
     public static class IntegerRestParamDeserializer implements RestParamDeserializer<Integer> {

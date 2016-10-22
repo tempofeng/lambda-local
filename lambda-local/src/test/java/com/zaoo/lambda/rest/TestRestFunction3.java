@@ -16,7 +16,8 @@ public class TestRestFunction3 {
                           @RestQuery("key9") double value9,
                           @RestQuery("key10") Boolean value10,
                           @RestQuery("key11") boolean value11,
-                          @RestQuery("gender") Gender gender) {
+                          @RestQuery("gender") Gender gender,
+                          @RestQuery(value = "customClass", deserializer = CustomRestParamDeserializer.class) CustomClass customClass) {
         return new Response(value1,
                 value2,
                 value3,
@@ -28,7 +29,29 @@ public class TestRestFunction3 {
                 value9,
                 value10,
                 value11,
-                gender);
+                gender,
+                customClass);
+    }
+
+    public static class CustomClass {
+        public String firstName;
+        public String lastName;
+
+        public CustomClass() {
+        }
+
+        public CustomClass(String firstName, String lastName) {
+            this.firstName = firstName;
+            this.lastName = lastName;
+        }
+    }
+
+    public static class CustomRestParamDeserializer implements RestParamDeserializer<CustomClass> {
+        @Override
+        public CustomClass deserialize(String str, Class<?> cls) {
+            String[] split = str.split(",");
+            return new CustomClass(split[0], split[1]);
+        }
     }
 
     public enum Gender {
@@ -48,6 +71,7 @@ public class TestRestFunction3 {
         public Boolean key10;
         public boolean key11;
         public Gender gender;
+        public CustomClass customClass;
 
         public Response() {
         }
@@ -63,7 +87,8 @@ public class TestRestFunction3 {
                         double key9,
                         Boolean key10,
                         boolean key11,
-                        Gender gender) {
+                        Gender gender,
+                        CustomClass customClass) {
             this.key1 = key1;
             this.key2 = key2;
             this.key3 = key3;
@@ -76,6 +101,7 @@ public class TestRestFunction3 {
             this.key10 = key10;
             this.key11 = key11;
             this.gender = gender;
+            this.customClass = customClass;
         }
     }
 }

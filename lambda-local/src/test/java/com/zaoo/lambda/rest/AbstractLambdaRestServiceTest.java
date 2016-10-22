@@ -14,7 +14,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class AbstractLambdaRestServiceTest {
     private final ObjectMapper objectMapper = ObjectMappers.getInstance();
-    private final RestParamDeserializerFactory restParamDeserializerFactory = new RestParamDeserializerFactory();
 
     @Before
     public void setUp() throws Exception {
@@ -24,7 +23,6 @@ public class AbstractLambdaRestServiceTest {
     public void parsePostParameters() throws Exception {
         Method method = TestRestFunction1.class.getMethod("hello", String.class, String.class, String.class);
         AbstractLambdaRestService.MethodInvoker methodInvoker = new AbstractLambdaRestService.MethodInvoker(objectMapper,
-                restParamDeserializerFactory,
                 method);
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setHeaders(ImmutableMap.of("Content-Type", "application/x-www-form-urlencoded"));
@@ -42,7 +40,6 @@ public class AbstractLambdaRestServiceTest {
                 String.class,
                 String.class);
         AbstractLambdaRestService.MethodInvoker methodInvoker = new AbstractLambdaRestService.MethodInvoker(objectMapper,
-                restParamDeserializerFactory,
                 method);
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setHeaders(ImmutableMap.of("Content-Type",
@@ -62,7 +59,6 @@ public class AbstractLambdaRestServiceTest {
     public void invoke_body() throws Exception {
         Method method = TestRestFunction2.class.getMethods()[0];
         AbstractLambdaRestService.MethodInvoker methodInvoker = new AbstractLambdaRestService.MethodInvoker(objectMapper,
-                restParamDeserializerFactory,
                 method);
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setHeaders(ImmutableMap.of(
@@ -83,7 +79,6 @@ public class AbstractLambdaRestServiceTest {
     public void invoke_restParamDeserializer() throws Exception {
         Method method = TestRestFunction3.class.getMethods()[0];
         AbstractLambdaRestService.MethodInvoker methodInvoker = new AbstractLambdaRestService.MethodInvoker(objectMapper,
-                restParamDeserializerFactory,
                 method);
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setHeaders(ImmutableMap.of(
@@ -102,6 +97,7 @@ public class AbstractLambdaRestServiceTest {
                 .put("key10", "true")
                 .put("key11", "FALSE")
                 .put("gender", "MALE")
+                .put("customClass", "tempo,feng")
                 .build();
         req.setQueryStringParameters(map);
         req.setBody("{\"addr\":\"台北市\",\"mobile\":\"12345\"}");
@@ -119,5 +115,7 @@ public class AbstractLambdaRestServiceTest {
         assertThat(func.key10).isEqualTo(true);
         assertThat(func.key11).isEqualTo(false);
         assertThat(func.gender).isEqualTo(TestRestFunction3.Gender.MALE);
+        assertThat(func.customClass.firstName).isEqualTo("tempo");
+        assertThat(func.customClass.lastName).isEqualTo("feng");
     }
 }

@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RestMethod {
     /**
-     * Use {@link HttpMethod.ANY} if this method accepts all HTTP methods.
+     * Use {@link HttpMethod#ANY} if this method accepts all HTTP methods.
      */
     HttpMethod value();
 }

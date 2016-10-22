@@ -14,4 +14,6 @@ public @interface RestForm {
     String value();
 
     boolean required() default true;
+
+    Class<? extends RestParamDeserializer<?>> deserializer() default DefaultRestParamDeserializer.class;
 }
