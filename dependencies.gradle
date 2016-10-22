@@ -32,6 +32,9 @@ ext {
     // mockito
     mockitoCore = 'org.mockito:mockito-core:2.2.5'
 
+    // okHttp
+    okHttp3 = 'com.squareup.okhttp3:okhttp:3.4.1'
+
     // reflections
     reflections = 'org.reflections:reflections:0.9.10'
 

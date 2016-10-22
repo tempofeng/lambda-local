@@ -1,14 +1,16 @@
 package com.zaoo.lambda.rest;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
 import com.zaoo.lambda.AbstractLambdaLocalRequestHandler;
 import com.zaoo.lambda.LambdaProxyRequest;
 import com.zaoo.lambda.LambdaProxyResponse;
 import com.zaoo.lambda.ObjectMappers;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.reflections.ReflectionUtils;
 
 import java.io.IOException;
@@ -16,19 +18,22 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+
 public abstract class AbstractLambdaRestService extends AbstractLambdaLocalRequestHandler {
-    private static final ObjectMapper OBJECT_MAPPER = ObjectMappers.getInstance();
     private final Map<HttpMethod, MethodInvoker> methodInvokers;
+    private final ObjectMapper objectMapper = ObjectMappers.getInstance();
 
     public AbstractLambdaRestService() {
         methodInvokers = ReflectionUtils.getMethods(getClass(),
                 ReflectionUtils.withAnnotation(RestMethod.class)).stream()
                 .collect(Collectors.toMap(
                         method -> method.getAnnotation(RestMethod.class).value(),
-                        MethodInvoker::new));
+                        method -> new MethodInvoker(objectMapper, method)));
     }
 
     @Override
@@ -44,24 +49,24 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
 
         try {
             Object result = methodInvoker.invoke(this, input);
-            return new LambdaProxyResponse(OBJECT_MAPPER.writeValueAsString(result));
+            return new LambdaProxyResponse(objectMapper.writeValueAsString(result));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
             try {
                 Error error = new Error(e.getLocalizedMessage(), e);
-                return new LambdaProxyResponse(500, Collections.emptyMap(), OBJECT_MAPPER.writeValueAsString(error));
+                return new LambdaProxyResponse(500, Collections.emptyMap(), objectMapper.writeValueAsString(error));
             } catch (JsonProcessingException jpe) {
                 throw new RuntimeException(jpe);
             }
         }
     }
 
-    private static class MethodInvoker {
+    static class MethodInvoker {
         private final Method method;
         private final List<ArgRetriever> argRetrievers = new ArrayList<>();
 
-        MethodInvoker(Method method) {
+        MethodInvoker(ObjectMapper objectMapper, Method method) {
             this.method = method;
 
             Parameter[] parameters = method.getParameters();
@@ -71,9 +76,15 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
                 Annotation[] annotations = parameterAnnotations[i];
                 Optional<Annotation> opt = Arrays.stream(annotations).filter(this::isRestAnnotation).findFirst();
                 if (opt.isPresent()) {
-                    argRetrievers.add(new ArgRetriever(ArgRetrieverType.ANNOTATION, parameter, opt.get()));
+                    argRetrievers.add(new ArgRetriever(objectMapper, ArgRetrieverType.ANNOTATION,
+                            parameter,
+                            opt.get()
+                    ));
                 } else if (parameter.getType().isAssignableFrom(LambdaProxyRequest.class)) {
-                    argRetrievers.add(new ArgRetriever(ArgRetrieverType.LAMBDA_PROXY_REQUEST, parameter, null));
+                    argRetrievers.add(new ArgRetriever(objectMapper, ArgRetrieverType.LAMBDA_PROXY_REQUEST,
+                            parameter,
+                            null
+                    ));
                 } else {
                     throw new IllegalArgumentException(String.format("Parameter:%s in @RestMethod must be annotated",
                             parameter.getName()));
@@ -82,18 +93,35 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
         }
 
         private boolean isRestAnnotation(Annotation annotation) {
-            return annotation instanceof RestQuery || annotation instanceof RestHeader || annotation instanceof RestBody;
+            return annotation instanceof RestQuery ||
+                    annotation instanceof RestHeader ||
+                    annotation instanceof RestBody ||
+                    annotation instanceof RestForm;
         }
 
         Object invoke(Object obj, LambdaProxyRequest request) throws InvocationTargetException {
+            final Map<String, String> postParams = parsePostParameters(request);
             try {
                 List<Object> args = argRetrievers.stream()
-                        .map(argRetriever -> argRetriever.retrieve(request))
-                        .collect(Collectors.toList());
+                        .map(argRetriever -> argRetriever.retrieve(request, postParams))
+                        .collect(toList());
                 return method.invoke(obj, args.toArray());
             } catch (IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
+        }
+
+        Map<String, String> parsePostParameters(LambdaProxyRequest request) {
+            if (!"application/x-www-form-urlencoded".equals(request.getHeaders().get("Content-Type"))) {
+                return Collections.emptyMap();
+            }
+
+            if (Strings.isNullOrEmpty(request.getBody())) {
+                return Collections.emptyMap();
+            }
+
+            return URLEncodedUtils.parse(request.getBody(), Charset.forName("UTF-8")).stream()
+                    .collect(Collectors.toMap(NameValuePair::getName, NameValuePair::getValue));
         }
     }
 
@@ -101,16 +129,31 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
         private final ArgRetrieverType type;
         private final Parameter parameter;
         private final Annotation annotation;
+        private final ObjectMapper objectMapper;
 
-        ArgRetriever(ArgRetrieverType type, Parameter parameter, Annotation annotation) {
+        ArgRetriever(ObjectMapper objectMapper,
+                     ArgRetrieverType type,
+                     Parameter parameter,
+                     Annotation annotation) {
             this.type = type;
             this.parameter = parameter;
             this.annotation = annotation;
+            this.objectMapper = objectMapper;
         }
 
-        Object retrieve(LambdaProxyRequest request) {
+        Object retrieve(LambdaProxyRequest request, Map<String, String> postParams) {
             switch (type) {
                 case ANNOTATION:
+                    if (annotation instanceof RestForm) {
+                        RestForm restForm = (RestForm) annotation;
+                        String name = restForm.value();
+                        String value = postParams.get(name);
+                        if (value == null && restForm.required()) {
+                            throw new IllegalArgumentException(String.format("Form param:%s can't be null", name));
+                        }
+                        return value;
+                    }
+
                     if (annotation instanceof RestQuery) {
                         RestQuery restQuery = (RestQuery) annotation;
                         String name = restQuery.value();
@@ -137,7 +180,7 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
                         }
 
                         try {
-                            return OBJECT_MAPPER.readValue(request.getBody(), parameter.getType());
+                            return objectMapper.readValue(request.getBody(), parameter.getType());
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }

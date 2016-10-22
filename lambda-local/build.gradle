@@ -16,6 +16,9 @@ dependencies {
     compile rootProject.ext.awsLambdaJavaCore
     compile rootProject.ext.awsLambdaJavaEvents
 
+    // hc
+    compile 'org.apache.httpcomponents:httpcore:4.4.5'
+
     // jackson
     compile rootProject.ext.jacksonCore
     compile rootProject.ext.jacksonDatabind
