@@ -14,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class AbstractLambdaRestServiceTest {
     private final ObjectMapper objectMapper = ObjectMappers.getInstance();
+    private final RestParamDeserializerFactory restParamDeserializerFactory = new RestParamDeserializerFactory();
 
     @Before
     public void setUp() throws Exception {
@@ -23,6 +24,7 @@ public class AbstractLambdaRestServiceTest {
     public void parsePostParameters() throws Exception {
         Method method = TestRestFunction1.class.getMethod("hello", String.class, String.class, String.class);
         AbstractLambdaRestService.MethodInvoker methodInvoker = new AbstractLambdaRestService.MethodInvoker(objectMapper,
+                restParamDeserializerFactory,
                 method);
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setHeaders(ImmutableMap.of("Content-Type", "application/x-www-form-urlencoded"));
@@ -35,8 +37,12 @@ public class AbstractLambdaRestServiceTest {
 
     @Test
     public void invoke() throws Exception {
-        Method method = TestRestFunction1.class.getMethod("hello", String.class, String.class, String.class);
+        Method method = TestRestFunction1.class.getMethod("hello",
+                String.class,
+                String.class,
+                String.class);
         AbstractLambdaRestService.MethodInvoker methodInvoker = new AbstractLambdaRestService.MethodInvoker(objectMapper,
+                restParamDeserializerFactory,
                 method);
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setHeaders(ImmutableMap.of("Content-Type",
@@ -54,9 +60,9 @@ public class AbstractLambdaRestServiceTest {
 
     @Test
     public void invoke_body() throws Exception {
-        Method method = TestRestFunction2.class.getMethod("hello", String.class, String.class, String.class,
-                TestRestFunction2.Request.class);
+        Method method = TestRestFunction2.class.getMethods()[0];
         AbstractLambdaRestService.MethodInvoker methodInvoker = new AbstractLambdaRestService.MethodInvoker(objectMapper,
+                restParamDeserializerFactory,
                 method);
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setHeaders(ImmutableMap.of(
@@ -71,5 +77,47 @@ public class AbstractLambdaRestServiceTest {
         assertThat(func.userToken).isEqualTo("testUserToken");
         assertThat(func.addr).isEqualTo("台北市");
         assertThat(func.mobile).isEqualTo("12345");
+    }
+
+    @Test
+    public void invoke_restParamDeserializer() throws Exception {
+        Method method = TestRestFunction3.class.getMethods()[0];
+        AbstractLambdaRestService.MethodInvoker methodInvoker = new AbstractLambdaRestService.MethodInvoker(objectMapper,
+                restParamDeserializerFactory,
+                method);
+        LambdaProxyRequest req = new LambdaProxyRequest();
+        req.setHeaders(ImmutableMap.of(
+                "userToken",
+                "testUserToken"));
+        ImmutableMap<String, String> map = ImmutableMap.<String, String>builder()
+                .put("key1", "value1")
+                .put("key2", "2")
+                .put("key3", "3")
+                .put("key4", "4")
+                .put("key5", "5")
+                .put("key6", "6.6")
+                .put("key7", "7.7")
+                .put("key8", "8.8")
+                .put("key9", "9.9")
+                .put("key10", "true")
+                .put("key11", "FALSE")
+                .put("gender", "MALE")
+                .build();
+        req.setQueryStringParameters(map);
+        req.setBody("{\"addr\":\"台北市\",\"mobile\":\"12345\"}");
+        TestRestFunction3.Response func = (TestRestFunction3.Response) methodInvoker.invoke(new TestRestFunction3(),
+                req);
+        assertThat(func.key1).isEqualTo("value1");
+        assertThat(func.key2).isEqualTo(2);
+        assertThat(func.key3).isEqualTo(3);
+        assertThat(func.key4).isEqualTo(4);
+        assertThat(func.key5).isEqualTo(5);
+        assertThat(func.key6).isEqualTo(6.6f);
+        assertThat(func.key7).isEqualTo(7.7f);
+        assertThat(func.key8).isEqualTo(8.8d);
+        assertThat(func.key9).isEqualTo(9.9d);
+        assertThat(func.key10).isEqualTo(true);
+        assertThat(func.key11).isEqualTo(false);
+        assertThat(func.gender).isEqualTo(TestRestFunction3.Gender.MALE);
     }
 }

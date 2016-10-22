@@ -22,7 +22,11 @@ public class TestRestFunction2 {
         public Response() {
         }
 
-        public Response(String firstName, String lastName, String userToken, String addr, String mobile) {
+        public Response(String firstName,
+                        String lastName,
+                        String userToken,
+                        String addr,
+                        String mobile) {
             this.firstName = firstName;
             this.lastName = lastName;
             this.userToken = userToken;
