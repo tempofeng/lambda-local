@@ -1,10 +1,7 @@
 package com.zaoo.lambda.rest;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.zaoo.lambda.LambdaProxyRequest;
-import com.zaoo.lambda.ObjectMappers;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
@@ -12,18 +9,11 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class AbstractLambdaRestServiceTest {
-    private final ObjectMapper objectMapper = ObjectMappers.getInstance();
-
-    @Before
-    public void setUp() throws Exception {
-    }
-
+public class MethodInvokerTest {
     @Test
     public void parsePostParameters() throws Exception {
         Method method = TestRestFunction1.class.getMethod("hello", String.class, String.class, String.class);
-        AbstractLambdaRestService.MethodInvoker methodInvoker = new AbstractLambdaRestService.MethodInvoker(objectMapper,
-                method);
+        MethodInvoker methodInvoker = new MethodInvoker(method);
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setHeaders(ImmutableMap.of("Content-Type", "application/x-www-form-urlencoded"));
         req.setBody("key1=value1&key2=value2");
@@ -39,8 +29,7 @@ public class AbstractLambdaRestServiceTest {
                 String.class,
                 String.class,
                 String.class);
-        AbstractLambdaRestService.MethodInvoker methodInvoker = new AbstractLambdaRestService.MethodInvoker(objectMapper,
-                method);
+        MethodInvoker methodInvoker = new MethodInvoker(method);
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setHeaders(ImmutableMap.of("Content-Type",
                 "application/x-www-form-urlencoded",
@@ -58,8 +47,7 @@ public class AbstractLambdaRestServiceTest {
     @Test
     public void invoke_body() throws Exception {
         Method method = TestRestFunction2.class.getMethods()[0];
-        AbstractLambdaRestService.MethodInvoker methodInvoker = new AbstractLambdaRestService.MethodInvoker(objectMapper,
-                method);
+        MethodInvoker methodInvoker = new MethodInvoker(method);
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setHeaders(ImmutableMap.of(
                 "userToken",
@@ -78,8 +66,7 @@ public class AbstractLambdaRestServiceTest {
     @Test
     public void invoke_restParamDeserializer() throws Exception {
         Method method = TestRestFunction3.class.getMethods()[0];
-        AbstractLambdaRestService.MethodInvoker methodInvoker = new AbstractLambdaRestService.MethodInvoker(objectMapper,
-                method);
+        MethodInvoker methodInvoker = new MethodInvoker(method);
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setHeaders(ImmutableMap.of(
                 "userToken",
