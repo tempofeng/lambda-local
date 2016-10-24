@@ -1,5 +1,6 @@
 package com.zaoo.lambda.rest;
 
+import com.zaoo.lambda.LambdaLocal;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -12,8 +13,7 @@ public class AbstractLambdaRestServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        abstractLambdaRestService = new AbstractLambdaRestService() {
-        };
+        abstractLambdaRestService = new TestLambdaRestService();
     }
 
     @Test
@@ -22,4 +22,7 @@ public class AbstractLambdaRestServiceTest {
         assertThat(methodInvokers.size()).isEqualTo(1);
     }
 
+    @LambdaLocal("/test")
+    private static class TestLambdaRestService extends AbstractLambdaRestService {
+    }
 }

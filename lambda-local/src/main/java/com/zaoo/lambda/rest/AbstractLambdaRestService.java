@@ -4,10 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zaoo.lambda.AbstractLambdaLocalRequestHandler;
-import com.zaoo.lambda.LambdaProxyRequest;
-import com.zaoo.lambda.LambdaProxyResponse;
-import com.zaoo.lambda.ObjectMappers;
+import com.zaoo.lambda.*;
 import org.reflections.ReflectionUtils;
 
 import java.lang.reflect.InvocationTargetException;
@@ -24,8 +21,14 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
     }
 
     List<MethodInvoker> createMethodInvokers(Class<?> cls) {
+        LambdaLocal lambdaLocal = cls.getAnnotation(LambdaLocal.class);
+        if(lambdaLocal.value().length != 1) {
+            throw new IllegalArgumentException("@LambdaLocal must have only one value() if using with AbstractLambdaRestService");
+        }
+        String lambdaLocalPath = lambdaLocal.value()[0];
+
         return ReflectionUtils.getMethods(cls, ReflectionUtils.withAnnotation(RestMethod.class)).stream()
-                .map(MethodInvoker::new)
+                .map(method -> new MethodInvoker(method, lambdaLocalPath))
                 .collect(Collectors.toList());
     }
 

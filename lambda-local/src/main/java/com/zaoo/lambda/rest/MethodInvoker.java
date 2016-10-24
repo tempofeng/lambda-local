@@ -16,22 +16,23 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.reducing;
 import static java.util.stream.Collectors.toList;
 
 class MethodInvoker {
     private static final Logger log = LoggerFactory.getLogger(MethodInvoker.class);
     private final Method method;
+    private final String lambdaLocalPath;
     private final List<ParamRetriever> paramRetrievers = new ArrayList<>();
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
-    private final String path;
-    private final HttpMethod httpMethod;
+    private final String expectedPath;
+    private final HttpMethod expectedHttpMethod;
 
-    MethodInvoker(Method method) {
+    MethodInvoker(Method method, String lambdaLocalPath) {
         this.method = method;
+        this.lambdaLocalPath = lambdaLocalPath;
         RestMethod restMethod = method.getAnnotation(RestMethod.class);
-        path = restMethod.path();
-        httpMethod = restMethod.httpMethod();
+        expectedPath = restMethod.path();
+        expectedHttpMethod = restMethod.httpMethod();
 
         Parameter[] parameters = method.getParameters();
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
@@ -70,7 +71,7 @@ class MethodInvoker {
 
     Object invoke(Object obj, LambdaProxyRequest request) throws InvocationTargetException {
         final Map<String, String> postParams = parsePostParameters(request);
-        Map<String, String> pathVariables = pathMatcher.extractUriTemplateVariables(path, getSubPath(request));
+        Map<String, String> pathVariables = pathMatcher.extractUriTemplateVariables(expectedPath, getSubPath(request));
         try {
             List<Object> args = paramRetrievers.stream()
                     .map(paramRetriever -> paramRetriever.retrieve(request, postParams, pathVariables))
@@ -127,10 +128,10 @@ class MethodInvoker {
     }
 
     public boolean match(LambdaProxyRequest input) {
-        log.info(String.format("path=%s,resource=%s", input, input.getResource()));
-        if (pathMatcher.match(path, getSubPath(input))) {
-            if (httpMethod == HttpMethod.ANY ||
-                    httpMethod.equals(HttpMethod.valueOf(input.getHttpMethod().toUpperCase()))) {
+        log.info(String.format("expectedPath=%s,resource=%s", input.getPath(), input.getResource()));
+        if (pathMatcher.match(expectedPath, getSubPath(input))) {
+            if (expectedHttpMethod == HttpMethod.ANY ||
+                    expectedHttpMethod.equals(HttpMethod.valueOf(input.getHttpMethod().toUpperCase()))) {
                 return true;
             }
         }
@@ -138,9 +139,9 @@ class MethodInvoker {
     }
 
     private String getSubPath(LambdaProxyRequest input) {
-        return input.getPath().equals(input.getResource()) ?
+        return input.getPath().equals(lambdaLocalPath) ?
                 "/" :
-                input.getPath().substring(input.getResource().length());
+                input.getPath().substring(lambdaLocalPath.length());
     }
 
     static class ErrorRestParamDeserializer implements RestParamDeserializer<Object> {

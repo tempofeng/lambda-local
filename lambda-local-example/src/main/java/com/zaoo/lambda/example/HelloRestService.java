@@ -8,14 +8,14 @@ import com.zaoo.lambda.rest.*;
 @SuppressWarnings("unused")
 public class HelloRestService extends AbstractLambdaRestService {
 
-    @RestMethod(httpMethod = HttpMethod.POST)
+    @RestMethod(httpMethod = HttpMethod.POST, path = "/")
     public HelloPojo.ResponseClass hello(@RestBody RequestClass request) {
         String greetingString = String.format("Hello %s, %s.", request.getFirstName(), request.getLastName());
         return new HelloPojo.ResponseClass(greetingString);
     }
 
-    @RestMethod(httpMethod = HttpMethod.GET)
-    public HelloPojo.ResponseClass helloWithRequest(@RestQuery("firstName") String firstName,
+    @RestMethod(httpMethod = HttpMethod.GET, path = "/{firstName}")
+    public HelloPojo.ResponseClass helloWithRequest(@RestPath("firstName") String firstName,
                                                     @RestQuery("lastName") String lastName,
                                                     LambdaProxyRequest request) {
         String greetingString = String.format("Hello %s, %s from %s!",

@@ -14,7 +14,7 @@ public class MethodInvokerTest {
     @Test
     public void parsePostParameters() throws Exception {
         Method method = TestRestFunction1.class.getMethod("hello", String.class, String.class, String.class);
-        MethodInvoker methodInvoker = new MethodInvoker(method);
+        MethodInvoker methodInvoker = new MethodInvoker(method, "/testRestPath1");
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setHeaders(ImmutableMap.of("Content-Type", "application/x-www-form-urlencoded"));
         req.setBody("key1=value1&key2=value2");
@@ -30,7 +30,7 @@ public class MethodInvokerTest {
                 String.class,
                 String.class,
                 String.class);
-        MethodInvoker methodInvoker = new MethodInvoker(method);
+        MethodInvoker methodInvoker = new MethodInvoker(method, "/testRestPath1");
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setHeaders(ImmutableMap.of("Content-Type",
                 "application/x-www-form-urlencoded",
@@ -39,7 +39,6 @@ public class MethodInvokerTest {
         req.setQueryStringParameters(ImmutableMap.of("lastName", "feng"));
         req.setBody("firstName=tempo");
         req.setPath("/testRestPath1");
-        req.setResource("/testRestPath1");
         TestRestFunction1.Response func = (TestRestFunction1.Response) methodInvoker.invoke(new TestRestFunction1(),
                 req);
         assertThat(func.firstName).isEqualTo("tempo");
@@ -50,10 +49,9 @@ public class MethodInvokerTest {
     @Test
     public void invoke_path() throws Exception {
         Method method = TestRestFunction4.class.getMethod("test3", String.class);
-        MethodInvoker methodInvoker = new MethodInvoker(method);
+        MethodInvoker methodInvoker = new MethodInvoker(method, "/testRestPath4");
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setPath("/testRestPath4/test/tempo");
-        req.setResource("/testRestPath4");
         String response = (String) methodInvoker.invoke(new TestRestFunction4(),
                 req);
         assertThat(response).isEqualTo("tempo");
@@ -62,7 +60,7 @@ public class MethodInvokerTest {
     @Test
     public void invoke_body() throws Exception {
         Method method = TestRestFunction2.class.getMethods()[0];
-        MethodInvoker methodInvoker = new MethodInvoker(method);
+        MethodInvoker methodInvoker = new MethodInvoker(method, "/testRestPath2");
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setHeaders(ImmutableMap.of(
                 "userToken",
@@ -70,7 +68,6 @@ public class MethodInvokerTest {
         req.setQueryStringParameters(ImmutableMap.of("firstName", "tempo", "lastName", "feng"));
         req.setBody("{\"addr\":\"台北市\",\"mobile\":\"12345\"}");
         req.setPath("/testRestPath2");
-        req.setResource("/testRestPath2");
         TestRestFunction2.Response func = (TestRestFunction2.Response) methodInvoker.invoke(new TestRestFunction2(),
                 req);
         assertThat(func.firstName).isEqualTo("tempo");
@@ -83,7 +80,7 @@ public class MethodInvokerTest {
     @Test
     public void invoke_restParamDeserializer() throws Exception {
         Method method = TestRestFunction3.class.getMethods()[0];
-        MethodInvoker methodInvoker = new MethodInvoker(method);
+        MethodInvoker methodInvoker = new MethodInvoker(method, "/testRestPath3");
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setHeaders(ImmutableMap.of(
                 "userToken",
@@ -106,7 +103,6 @@ public class MethodInvokerTest {
         req.setQueryStringParameters(map);
         req.setBody("{\"addr\":\"台北市\",\"mobile\":\"12345\"}");
         req.setPath("/testRestPath3");
-        req.setResource("/testRestPath3");
         TestRestFunction3.Response func = (TestRestFunction3.Response) methodInvoker.invoke(new TestRestFunction3(),
                 req);
         assertThat(func.key1).isEqualTo("value1");
@@ -129,11 +125,10 @@ public class MethodInvokerTest {
     public void match() throws Exception {
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setPath("/testRestPath4/test");
-        req.setResource("/testRestPath4");
         req.setHttpMethod(HttpMethod.GET.name());
 
         Method method = TestRestFunction4.class.getMethod("test2");
-        MethodInvoker methodInvoker = new MethodInvoker(method);
+        MethodInvoker methodInvoker = new MethodInvoker(method, "/testRestPath4");
         assertThat(methodInvoker.match(req)).isTrue();
     }
 
@@ -141,11 +136,10 @@ public class MethodInvokerTest {
     public void match_variable() throws Exception {
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setPath("/testRestPath4/test/tempo");
-        req.setResource("/testRestPath4");
         req.setHttpMethod(HttpMethod.GET.name());
 
         Method method = TestRestFunction4.class.getMethod("test3", String.class);
-        MethodInvoker methodInvoker = new MethodInvoker(method);
+        MethodInvoker methodInvoker = new MethodInvoker(method, "/testRestPath4");
         assertThat(methodInvoker.match(req)).isTrue();
     }
 
@@ -153,11 +147,10 @@ public class MethodInvokerTest {
     public void match_root() throws Exception {
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setPath("/testRestPath4");
-        req.setResource("/testRestPath4");
         req.setHttpMethod(HttpMethod.POST.name());
 
         Method method = TestRestFunction4.class.getMethod("test1");
-        MethodInvoker methodInvoker = new MethodInvoker(method);
+        MethodInvoker methodInvoker = new MethodInvoker(method, "/testRestPath4");
         assertThat(methodInvoker.match(req)).isTrue();
     }
 }

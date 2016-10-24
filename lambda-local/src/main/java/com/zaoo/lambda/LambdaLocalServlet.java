@@ -2,6 +2,7 @@ package com.zaoo.lambda;
 
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import org.springframework.util.AntPathMatcher;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 
 public class LambdaLocalServlet extends HttpServlet {
     private final LambdaFunctionAnnotationScanner lambdaFunctionAnnotationScanner = new LambdaFunctionAnnotationScanner();
-    private Map<String, LambdaFunction> lambdaFunctions;
+    private List<LambdaFunction> lambdaFunctions;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -35,13 +36,12 @@ public class LambdaLocalServlet extends HttpServlet {
     private void initLambdaFunctions(List<String> packageNames) {
         lambdaFunctions = packageNames.stream()
                 .flatMap(packageName -> lambdaFunctionAnnotationScanner.listLambdaFunctions(packageName).stream())
-                .collect(Collectors.toMap(LambdaFunction::getPath, lambdaFunction -> lambdaFunction));
+                .collect(Collectors.toList());
     }
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        String path = getRequestPath(req);
-        LambdaFunction lambdaFunction = lambdaFunctions.get(path);
+        LambdaFunction lambdaFunction = getLambdaFunction(req);
         if (lambdaFunction == null) {
             super.service(req, resp);
             return;
@@ -54,6 +54,16 @@ public class LambdaLocalServlet extends HttpServlet {
         } catch (InvocationTargetException e) {
             throw new IllegalArgumentException("Unable to find handler method:" + lambdaFunction.getHandlerMethod(), e);
         }
+    }
+
+    private LambdaFunction getLambdaFunction(HttpServletRequest req) {
+        String path = getRequestPath(req);
+        for(LambdaFunction lambdaFunction : lambdaFunctions) {
+            if(path.startsWith(lambdaFunction.getPath())) {
+                return lambdaFunction;
+            }
+        }
+        return null;
     }
 
     void invokeLambdaFunction(HttpServletRequest req,
