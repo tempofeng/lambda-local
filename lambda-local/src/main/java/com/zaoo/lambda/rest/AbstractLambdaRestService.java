@@ -12,36 +12,39 @@ import org.reflections.ReflectionUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class AbstractLambdaRestService extends AbstractLambdaLocalRequestHandler {
-    private final Map<HttpMethod, MethodInvoker> methodInvokers;
+    private final List<MethodInvoker> methodInvokers;
     private final ObjectMapper objectMapper = ObjectMappers.getInstance();
 
     public AbstractLambdaRestService() {
         methodInvokers = createMethodInvokers(getClass());
     }
 
-    Map<HttpMethod, MethodInvoker> createMethodInvokers(Class<?> cls) {
+    List<MethodInvoker> createMethodInvokers(Class<?> cls) {
         return ReflectionUtils.getMethods(cls,
                 ReflectionUtils.withAnnotation(RestMethod.class)).stream()
-                .collect(Collectors.toMap(
-                        method -> method.getAnnotation(RestMethod.class).value(),
-                        MethodInvoker::new));
+                .map(MethodInvoker::new)
+                .collect(Collectors.toList());
     }
 
     @Override
     public LambdaProxyResponse handleRequest(LambdaProxyRequest input, Context context) {
         HttpMethod httpMethod = HttpMethod.valueOf(input.getHttpMethod().toUpperCase());
-        MethodInvoker methodInvoker = methodInvokers.get(httpMethod);
-        if (methodInvoker == null) {
-            methodInvoker = methodInvokers.get(HttpMethod.ANY);
-        }
-        if (methodInvoker == null) {
-            throw new IllegalArgumentException("Unable to find implementation of HTTP method:" + httpMethod);
+        for (MethodInvoker methodInvoker : methodInvokers) {
+            if (methodInvoker.match(input)) {
+                return invokeMethod(methodInvoker, input);
+            }
         }
 
+        throw new IllegalArgumentException(String.format("Unhandled request:path=%s,method=%s",
+                input.getPath(),
+                httpMethod));
+    }
+
+    private LambdaProxyResponse invokeMethod(MethodInvoker methodInvoker, LambdaProxyRequest input) {
         try {
             Object result = methodInvoker.invoke(this, input);
             return new LambdaProxyResponse(objectMapper.writeValueAsString(result));

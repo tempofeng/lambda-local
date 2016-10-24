@@ -4,7 +4,7 @@ import com.zaoo.lambda.LambdaLocal;
 
 @LambdaLocal("/testRestPath3")
 public class TestRestFunction3 {
-    @RestMethod(HttpMethod.GET)
+    @RestMethod(httpMethod = HttpMethod.GET, path = "/")
     public Response hello(@RestQuery("key1") String value1,
                           @RestQuery("key2") Integer value2,
                           @RestQuery("key3") int value3,

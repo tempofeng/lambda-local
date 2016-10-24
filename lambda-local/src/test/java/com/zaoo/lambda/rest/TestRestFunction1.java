@@ -4,11 +4,16 @@ import com.zaoo.lambda.LambdaLocal;
 
 @LambdaLocal("/testRestPath1")
 public class TestRestFunction1 {
-    @RestMethod(HttpMethod.POST)
+    @RestMethod(httpMethod = HttpMethod.POST, path = "/")
     public Response hello(@RestForm("firstName") String firstName,
                           @RestQuery("lastName") String lastName,
                           @RestHeader("userToken") String userToken) {
         return new Response(firstName, lastName, userToken);
+    }
+
+    @RestMethod(httpMethod = HttpMethod.GET, path = "/test")
+    public String test() {
+        return "test";
     }
 
     public static class Response {

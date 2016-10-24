@@ -105,4 +105,28 @@ public class MethodInvokerTest {
         assertThat(func.customClass.firstName).isEqualTo("tempo");
         assertThat(func.customClass.lastName).isEqualTo("feng");
     }
+
+    @Test
+    public void match() throws Exception {
+        LambdaProxyRequest req = new LambdaProxyRequest();
+        req.setPath("/testRestPath4/test");
+        req.setResource("/testRestPath4");
+        req.setHttpMethod(HttpMethod.GET.name());
+
+        Method method = TestRestFunction4.class.getMethod("test2");
+        MethodInvoker methodInvoker = new MethodInvoker(method);
+        assertThat(methodInvoker.match(req)).isTrue();
+    }
+
+    @Test
+    public void match_root() throws Exception {
+        LambdaProxyRequest req = new LambdaProxyRequest();
+        req.setPath("/testRestPath4");
+        req.setResource("/testRestPath4");
+        req.setHttpMethod(HttpMethod.POST.name());
+
+        Method method = TestRestFunction4.class.getMethod("test1");
+        MethodInvoker methodInvoker = new MethodInvoker(method);
+        assertThat(methodInvoker.match(req)).isTrue();
+    }
 }

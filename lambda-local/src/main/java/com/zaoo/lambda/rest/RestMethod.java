@@ -11,5 +11,7 @@ public @interface RestMethod {
     /**
      * Use {@link HttpMethod#ANY} if this method accepts all HTTP methods.
      */
-    HttpMethod value();
+    HttpMethod httpMethod() default HttpMethod.ANY;
+
+    String path();
 }
