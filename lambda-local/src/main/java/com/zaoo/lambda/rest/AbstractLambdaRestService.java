@@ -22,8 +22,9 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
 
     List<MethodInvoker> createMethodInvokers(Class<?> cls) {
         LambdaLocal lambdaLocal = cls.getAnnotation(LambdaLocal.class);
-        if(lambdaLocal.value().length != 1) {
-            throw new IllegalArgumentException("@LambdaLocal must have only one value() if using with AbstractLambdaRestService");
+        if (lambdaLocal.value().length != 1) {
+            throw new IllegalArgumentException(
+                    "@LambdaLocal must have only one value() if using with AbstractLambdaRestService");
         }
         String lambdaLocalPath = lambdaLocal.value()[0];
 
@@ -53,7 +54,12 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
             try {
-                Error error = new Error(e.getLocalizedMessage(), e);
+                Error error;
+                if (e.getCause() != null) {
+                    error = new Error(e.getCause().getLocalizedMessage(), e.getCause());
+                } else {
+                    error = new Error(e.getLocalizedMessage(), e);
+                }
                 return new LambdaProxyResponse(500, Collections.emptyMap(), objectMapper.writeValueAsString(error));
             } catch (JsonProcessingException jpe) {
                 throw new RuntimeException(jpe);
@@ -61,14 +67,30 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
         }
     }
 
-    static class Error {
-        public String message;
+    public static class Error {
+        private String message;
         @JsonProperty(value = "exception")
-        public String exceptionClass;
+        private String exceptionClass;
 
         Error(String message, Throwable t) {
             this.message = message;
             this.exceptionClass = t.getClass().getName();
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+
+        public String getExceptionClass() {
+            return exceptionClass;
+        }
+
+        public void setExceptionClass(String exceptionClass) {
+            this.exceptionClass = exceptionClass;
         }
     }
 

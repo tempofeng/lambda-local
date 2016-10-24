@@ -65,7 +65,7 @@ class ParamRetriever {
             String name = restPath.value();
             String valueStr = pathVariables.get(name);
             if (valueStr == null && restPath.required()) {
-                throw new IllegalArgumentException(String.format("Form param:%s can't be null", name));
+                throw new IllegalArgumentException(String.format("Path param:%s can't be null", name));
             }
             return restParamDeserializer.deserialize(valueStr, parameter.getType());
         }

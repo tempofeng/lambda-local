@@ -17,6 +17,8 @@ ext {
     // guava
     guava = 'com.google.guava:guava:19.0'
 
+    httpCore = 'org.apache.httpcomponents:httpcore:4.4.5'
+
     // jackson
     jacksonCore = 'com.fasterxml.jackson.core:jackson-core:2.8.4'
     jacksonDatabind = 'com.fasterxml.jackson.core:jackson-databind:2.8.4'
@@ -34,6 +36,9 @@ ext {
 
     // reflections
     reflections = 'org.reflections:reflections:0.9.10'
+
+    // spring
+    springCore = 'org.springframework:spring-core:4.3.3.RELEASE'
 
     // servlet api
     servletApi = 'javax.servlet:javax.servlet-api:3.1.0'

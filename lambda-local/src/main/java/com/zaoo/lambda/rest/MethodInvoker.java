@@ -24,15 +24,15 @@ class MethodInvoker {
     private final String lambdaLocalPath;
     private final List<ParamRetriever> paramRetrievers = new ArrayList<>();
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
-    private final String expectedPath;
-    private final HttpMethod expectedHttpMethod;
+    private final String methodPath;
+    private final HttpMethod httpMethod;
 
     MethodInvoker(Method method, String lambdaLocalPath) {
         this.method = method;
         this.lambdaLocalPath = lambdaLocalPath;
         RestMethod restMethod = method.getAnnotation(RestMethod.class);
-        expectedPath = restMethod.path();
-        expectedHttpMethod = restMethod.httpMethod();
+        methodPath = restMethod.path();
+        httpMethod = restMethod.httpMethod();
 
         Parameter[] parameters = method.getParameters();
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
@@ -71,7 +71,7 @@ class MethodInvoker {
 
     Object invoke(Object obj, LambdaProxyRequest request) throws InvocationTargetException {
         final Map<String, String> postParams = parsePostParameters(request);
-        Map<String, String> pathVariables = pathMatcher.extractUriTemplateVariables(expectedPath, getSubPath(request));
+        Map<String, String> pathVariables = pathMatcher.extractUriTemplateVariables(methodPath, getSubPath(request));
         try {
             List<Object> args = paramRetrievers.stream()
                     .map(paramRetriever -> paramRetriever.retrieve(request, postParams, pathVariables))
@@ -128,10 +128,10 @@ class MethodInvoker {
     }
 
     public boolean match(LambdaProxyRequest input) {
-        log.info(String.format("expectedPath=%s,resource=%s", input.getPath(), input.getResource()));
-        if (pathMatcher.match(expectedPath, getSubPath(input))) {
-            if (expectedHttpMethod == HttpMethod.ANY ||
-                    expectedHttpMethod.equals(HttpMethod.valueOf(input.getHttpMethod().toUpperCase()))) {
+        log.debug(String.format("methodPath=%s,resource=%s", input.getPath(), input.getResource()));
+        if (pathMatcher.match(methodPath, getSubPath(input))) {
+            if (httpMethod == HttpMethod.ANY ||
+                    httpMethod.equals(HttpMethod.valueOf(input.getHttpMethod().toUpperCase()))) {
                 return true;
             }
         }

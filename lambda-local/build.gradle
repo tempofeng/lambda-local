@@ -7,6 +7,7 @@ compileJava {
 }
 
 dependencies {
+    // commons io
     compile rootProject.ext.commonsIO
 
     // reflections
@@ -17,7 +18,7 @@ dependencies {
     compile rootProject.ext.awsLambdaJavaEvents
 
     // hc
-    compile 'org.apache.httpcomponents:httpcore:4.4.5'
+    compile rootProject.ext.httpCore
 
     // jackson
     compile rootProject.ext.jacksonCore
@@ -32,7 +33,7 @@ dependencies {
     compile rootProject.ext.slf4jApi
 
     // spring core
-    compile group: 'org.springframework', name: 'spring-core', version: '4.3.3.RELEASE'
+    compile rootProject.ext.springCore
 
     // servlet api
     compileOnly rootProject.ext.servletApi

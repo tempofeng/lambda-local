@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 public @interface LambdaLocal {
     /**
      * The server path of this request handler when you start lambda-local.
-     * The path is like {@link HttpServletRequest#getPathInfo()}.
+     * The path is like {@link HttpServletRequest#getPathInfo()} and it's better to be the same as resourcePath in Api Gateway.
      * Ex: '/helloWorld'.
      */
     String[] value();
