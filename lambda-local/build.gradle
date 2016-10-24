@@ -31,6 +31,9 @@ dependencies {
     // slf4j
     compile rootProject.ext.slf4jApi
 
+    // spring core
+    compile group: 'org.springframework', name: 'spring-core', version: '4.3.3.RELEASE'
+
     // servlet api
     compileOnly rootProject.ext.servletApi
     testCompile rootProject.ext.servletApi

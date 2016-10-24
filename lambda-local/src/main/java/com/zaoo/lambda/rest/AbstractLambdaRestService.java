@@ -20,7 +20,11 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
     private final ObjectMapper objectMapper = ObjectMappers.getInstance();
 
     public AbstractLambdaRestService() {
-        methodInvokers = ReflectionUtils.getMethods(getClass(),
+        methodInvokers = createMethodInvokers(getClass());
+    }
+
+    Map<HttpMethod, MethodInvoker> createMethodInvokers(Class<?> cls) {
+        return ReflectionUtils.getMethods(cls,
                 ReflectionUtils.withAnnotation(RestMethod.class)).stream()
                 .collect(Collectors.toMap(
                         method -> method.getAnnotation(RestMethod.class).value(),
