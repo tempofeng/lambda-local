@@ -64,14 +64,16 @@ class MethodInvoker {
         return annotation instanceof RestQuery ||
                 annotation instanceof RestHeader ||
                 annotation instanceof RestBody ||
-                annotation instanceof RestForm;
+                annotation instanceof RestForm ||
+                annotation instanceof RestPath;
     }
 
     Object invoke(Object obj, LambdaProxyRequest request) throws InvocationTargetException {
         final Map<String, String> postParams = parsePostParameters(request);
+        Map<String, String> pathVariables = pathMatcher.extractUriTemplateVariables(path, getSubPath(request));
         try {
             List<Object> args = paramRetrievers.stream()
-                    .map(paramRetriever -> paramRetriever.retrieve(request, postParams))
+                    .map(paramRetriever -> paramRetriever.retrieve(request, postParams, pathVariables))
                     .collect(toList());
             return method.invoke(obj, args.toArray());
         } catch (IllegalAccessException e) {
@@ -103,6 +105,11 @@ class MethodInvoker {
             return createDeserializer(restForm.deserializer());
         }
 
+        if (annotation instanceof RestPath) {
+            RestPath restPath = (RestPath) annotation;
+            return createDeserializer(restPath.deserializer());
+        }
+
         if (annotation instanceof RestHeader) {
             RestHeader restHeader = (RestHeader) annotation;
             return createDeserializer(restHeader.deserializer());
@@ -121,16 +128,19 @@ class MethodInvoker {
 
     public boolean match(LambdaProxyRequest input) {
         log.info(String.format("path=%s,resource=%s", input, input.getResource()));
-        String subPath = input.getPath().equals(input.getResource()) ?
-                "/" :
-                input.getPath().substring(input.getResource().length());
-        if (pathMatcher.match(path, subPath)) {
-            if (httpMethod == HttpMethod.ANY) {
+        if (pathMatcher.match(path, getSubPath(input))) {
+            if (httpMethod == HttpMethod.ANY ||
+                    httpMethod.equals(HttpMethod.valueOf(input.getHttpMethod().toUpperCase()))) {
                 return true;
             }
-            return httpMethod.equals(HttpMethod.valueOf(input.getHttpMethod().toUpperCase()));
         }
         return false;
+    }
+
+    private String getSubPath(LambdaProxyRequest input) {
+        return input.getPath().equals(input.getResource()) ?
+                "/" :
+                input.getPath().substring(input.getResource().length());
     }
 
     static class ErrorRestParamDeserializer implements RestParamDeserializer<Object> {

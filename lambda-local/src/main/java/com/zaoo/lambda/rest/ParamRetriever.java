@@ -26,10 +26,10 @@ class ParamRetriever {
         this.restParamDeserializer = restParamDeserializer;
     }
 
-    Object retrieve(LambdaProxyRequest request, Map<String, String> postParams) {
+    Object retrieve(LambdaProxyRequest request, Map<String, String> postParams, Map<String, String> pathVariables) {
         switch (type) {
             case ANNOTATION:
-                return retrieveByAnnotation(request, postParams);
+                return retrieveByAnnotation(request, postParams, pathVariables);
             case LAMBDA_PROXY_REQUEST:
                 return request;
             default:
@@ -37,7 +37,19 @@ class ParamRetriever {
         }
     }
 
-    private Object retrieveByAnnotation(LambdaProxyRequest request, Map<String, String> postParams) {
+    private Object retrieveByAnnotation(LambdaProxyRequest request,
+                                        Map<String, String> postParams,
+                                        Map<String, String> pathVariables) {
+        if (annotation instanceof RestQuery) {
+            RestQuery restQuery = (RestQuery) annotation;
+            String name = restQuery.value();
+            String valueStr = request.getQueryStringParameters().get(name);
+            if (valueStr == null && restQuery.required()) {
+                throw new IllegalArgumentException(String.format("Request param:%s can't be null", name));
+            }
+            return restParamDeserializer.deserialize(valueStr, parameter.getType());
+        }
+
         if (annotation instanceof RestForm) {
             RestForm restForm = (RestForm) annotation;
             String name = restForm.value();
@@ -48,12 +60,12 @@ class ParamRetriever {
             return restParamDeserializer.deserialize(valueStr, parameter.getType());
         }
 
-        if (annotation instanceof RestQuery) {
-            RestQuery restQuery = (RestQuery) annotation;
-            String name = restQuery.value();
-            String valueStr = request.getQueryStringParameters().get(name);
-            if (valueStr == null && restQuery.required()) {
-                throw new IllegalArgumentException(String.format("Request param:%s can't be null", name));
+        if (annotation instanceof RestPath) {
+            RestPath restPath = (RestPath) annotation;
+            String name = restPath.value();
+            String valueStr = pathVariables.get(name);
+            if (valueStr == null && restPath.required()) {
+                throw new IllegalArgumentException(String.format("Form param:%s can't be null", name));
             }
             return restParamDeserializer.deserialize(valueStr, parameter.getType());
         }

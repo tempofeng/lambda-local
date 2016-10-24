@@ -11,11 +11,6 @@ public class TestRestFunction1 {
         return new Response(firstName, lastName, userToken);
     }
 
-    @RestMethod(httpMethod = HttpMethod.GET, path = "/test")
-    public String test() {
-        return "test";
-    }
-
     public static class Response {
         public String firstName;
         public String lastName;

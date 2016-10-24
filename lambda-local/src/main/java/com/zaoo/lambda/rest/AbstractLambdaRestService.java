@@ -24,8 +24,7 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
     }
 
     List<MethodInvoker> createMethodInvokers(Class<?> cls) {
-        return ReflectionUtils.getMethods(cls,
-                ReflectionUtils.withAnnotation(RestMethod.class)).stream()
+        return ReflectionUtils.getMethods(cls, ReflectionUtils.withAnnotation(RestMethod.class)).stream()
                 .map(MethodInvoker::new)
                 .collect(Collectors.toList());
     }
@@ -38,7 +37,6 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
                 return invokeMethod(methodInvoker, input);
             }
         }
-
         throw new IllegalArgumentException(String.format("Unhandled request:path=%s,method=%s",
                 input.getPath(),
                 httpMethod));

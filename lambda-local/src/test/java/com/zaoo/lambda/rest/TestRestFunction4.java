@@ -13,4 +13,9 @@ public class TestRestFunction4 {
     public String test2() {
         return "test2";
     }
+
+    @RestMethod(httpMethod = HttpMethod.GET, path = "/test/{id}")
+    public String test3(@RestPath("id") String id) {
+        return id;
+    }
 }
