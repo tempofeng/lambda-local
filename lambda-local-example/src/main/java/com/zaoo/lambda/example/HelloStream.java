@@ -14,7 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 @SuppressWarnings("unused")
-@LambdaLocal(value = "/helloStream", serializer = HelloStream.Serializer.class, deserializer = HelloStream.Deserializer.class)
+@LambdaLocal(value = "/lleHelloStream", serializer = HelloStream.Serializer.class, deserializer = HelloStream.Deserializer.class)
 public class HelloStream implements RequestStreamHandler {
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {

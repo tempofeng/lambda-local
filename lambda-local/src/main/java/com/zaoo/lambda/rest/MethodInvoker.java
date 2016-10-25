@@ -71,7 +71,7 @@ class MethodInvoker {
 
     Object invoke(Object obj, LambdaProxyRequest request) throws InvocationTargetException {
         final Map<String, String> postParams = parsePostParameters(request);
-        Map<String, String> pathVariables = pathMatcher.extractUriTemplateVariables(methodPath, getSubPath(request));
+        Map<String, String> pathVariables = pathMatcher.extractUriTemplateVariables(methodPath, getRestMethodPath(request));
         try {
             List<Object> args = paramRetrievers.stream()
                     .map(paramRetriever -> paramRetriever.retrieve(request, postParams, pathVariables))
@@ -128,8 +128,9 @@ class MethodInvoker {
     }
 
     public boolean match(LambdaProxyRequest input) {
-        log.debug(String.format("methodPath=%s,resource=%s", input.getPath(), input.getResource()));
-        if (pathMatcher.match(methodPath, getSubPath(input))) {
+        String restMethodPath = getRestMethodPath(input);
+        log.debug("path={},restMethodPath={},resource={}", input.getPath(), restMethodPath, input.getResource());
+        if (pathMatcher.match(methodPath, restMethodPath)) {
             if (httpMethod == HttpMethod.ANY ||
                     httpMethod.equals(HttpMethod.valueOf(input.getHttpMethod().toUpperCase()))) {
                 return true;
@@ -138,7 +139,7 @@ class MethodInvoker {
         return false;
     }
 
-    private String getSubPath(LambdaProxyRequest input) {
+    private String getRestMethodPath(LambdaProxyRequest input) {
         return input.getPath().equals(lambdaLocalPath) ?
                 "/" :
                 input.getPath().substring(lambdaLocalPath.length());

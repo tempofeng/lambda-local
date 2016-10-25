@@ -8,7 +8,7 @@ import com.zaoo.lambda.LambdaProxyResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@LambdaLocal("/helloLambdaProxy")
+@LambdaLocal("/lleHelloLambdaProxy")
 @SuppressWarnings("unused")
 public class HelloLambdaProxy extends AbstractLambdaLocalRequestHandler {
     private static final Logger log = LoggerFactory.getLogger(HelloLambdaProxy.class);

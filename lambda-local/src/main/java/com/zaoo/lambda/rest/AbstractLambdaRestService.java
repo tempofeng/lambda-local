@@ -64,6 +64,14 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
             } catch (JsonProcessingException jpe) {
                 throw new RuntimeException(jpe);
             }
+        } catch (Exception e) {
+            try {
+                return new LambdaProxyResponse(500,
+                        Collections.emptyMap(),
+                        objectMapper.writeValueAsString(new Error(e.getLocalizedMessage(), e)));
+            } catch (JsonProcessingException jpe) {
+                throw new RuntimeException(jpe);
+            }
         }
     }
 
