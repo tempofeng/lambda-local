@@ -2,6 +2,8 @@ package com.zaoo.lambda;
 
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.AntPathMatcher;
 
 import javax.servlet.ServletConfig;
@@ -18,6 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class LambdaLocalServlet extends HttpServlet {
+    private static final Logger log = LoggerFactory.getLogger(LambdaLocalServlet.class);
     private final LambdaFunctionAnnotationScanner lambdaFunctionAnnotationScanner = new LambdaFunctionAnnotationScanner();
     private List<LambdaFunction> lambdaFunctions;
 
@@ -48,6 +51,7 @@ public class LambdaLocalServlet extends HttpServlet {
         }
 
         try {
+            log.debug("invokeLambdaFunction:lambdaLocalPath={}", lambdaFunction.getPath());
             invokeLambdaFunction(req, resp, lambdaFunction);
         } catch (InstantiationException | IllegalAccessException e) {
             throw new IllegalArgumentException("Unable to find handler class:" + lambdaFunction.getHandlerClass(), e);

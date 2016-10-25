@@ -6,6 +6,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaoo.lambda.*;
 import org.reflections.ReflectionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
@@ -13,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public abstract class AbstractLambdaRestService extends AbstractLambdaLocalRequestHandler {
+    private static final Logger log = LoggerFactory.getLogger(AbstractLambdaRestService.class);
     private final List<MethodInvoker> methodInvokers;
     private final ObjectMapper objectMapper = ObjectMappers.getInstance();
 
@@ -48,11 +51,15 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
 
     private LambdaProxyResponse invokeMethod(MethodInvoker methodInvoker, LambdaProxyRequest input) {
         try {
+            log.debug("invokeMethod:methodPath={},httpMethod={}",
+                    methodInvoker.getMethodPath(),
+                    methodInvoker.getHttpMethod());
             Object result = methodInvoker.invoke(this, input);
             return new LambdaProxyResponse(objectMapper.writeValueAsString(result));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
+            log.error(e.getLocalizedMessage(), e);
             try {
                 Error error;
                 if (e.getCause() != null) {
@@ -65,6 +72,7 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
                 throw new RuntimeException(jpe);
             }
         } catch (Exception e) {
+            log.error(e.getLocalizedMessage(), e);
             try {
                 return new LambdaProxyResponse(500,
                         Collections.emptyMap(),

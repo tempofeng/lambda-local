@@ -61,6 +61,14 @@ class MethodInvoker {
         }
     }
 
+    public String getMethodPath() {
+        return methodPath;
+    }
+
+    public HttpMethod getHttpMethod() {
+        return httpMethod;
+    }
+
     private boolean isRestAnnotation(Annotation annotation) {
         return annotation instanceof RestQuery ||
                 annotation instanceof RestHeader ||
@@ -71,7 +79,8 @@ class MethodInvoker {
 
     Object invoke(Object obj, LambdaProxyRequest request) throws InvocationTargetException {
         final Map<String, String> postParams = parsePostParameters(request);
-        Map<String, String> pathVariables = pathMatcher.extractUriTemplateVariables(methodPath, getRestMethodPath(request));
+        Map<String, String> pathVariables = pathMatcher.extractUriTemplateVariables(methodPath,
+                getRestMethodPath(request));
         try {
             List<Object> args = paramRetrievers.stream()
                     .map(paramRetriever -> paramRetriever.retrieve(request, postParams, pathVariables))
@@ -129,10 +138,15 @@ class MethodInvoker {
 
     public boolean match(LambdaProxyRequest input) {
         String restMethodPath = getRestMethodPath(input);
-        log.debug("path={},restMethodPath={},resource={}", input.getPath(), restMethodPath, input.getResource());
+        log.trace("findingMatchingMethod:methodPath={},requestPath={},restMethodPath={},resource={}",
+                methodPath,
+                input.getPath(),
+                restMethodPath,
+                input.getResource());
         if (pathMatcher.match(methodPath, restMethodPath)) {
             if (httpMethod == HttpMethod.ANY ||
                     httpMethod.equals(HttpMethod.valueOf(input.getHttpMethod().toUpperCase()))) {
+                log.trace("MatchingMethodFound:methodPath={}", methodPath);
                 return true;
             }
         }
