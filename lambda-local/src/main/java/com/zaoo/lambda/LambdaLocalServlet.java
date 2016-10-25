@@ -58,14 +58,21 @@ public class LambdaLocalServlet extends HttpServlet {
 
     private LambdaFunction getLambdaFunction(HttpServletRequest req) {
         String path = getRequestPath(req);
-        for(LambdaFunction lambdaFunction : lambdaFunctions) {
-            if(path.startsWith(lambdaFunction.getPath())) {
-                return lambdaFunction;
+        LambdaFunction ret = null;
+        for (LambdaFunction lambdaFunction : lambdaFunctions) {
+            if (path.startsWith(lambdaFunction.getPath())) {
+                if (ret == null) {
+                    ret = lambdaFunction;
+                } else {
+                    // There might be more than one lambdaFunction.path() matched. Pick the longest matched.
+                    ret = lambdaFunction.getPath().length() > ret.getPath().length() ? lambdaFunction : ret;
+                }
             }
         }
-        return null;
+        return ret;
     }
 
+    @SuppressWarnings("unchecked")
     void invokeLambdaFunction(HttpServletRequest req,
                               HttpServletResponse resp,
                               LambdaFunction lambdaFunction) throws InstantiationException, IllegalAccessException, IOException, InvocationTargetException {
