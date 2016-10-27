@@ -3,6 +3,8 @@ package com.zaoo.lambda.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaoo.lambda.LambdaProxyRequest;
 import com.zaoo.lambda.ObjectMappers;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -10,6 +12,7 @@ import java.lang.reflect.Parameter;
 import java.util.Map;
 
 class ParamRetriever {
+    private static final Logger log = LoggerFactory.getLogger(ParamRetriever.class);
     private final ParamRetrieverType type;
     private final Parameter parameter;
     private final Annotation annotation;
@@ -37,15 +40,20 @@ class ParamRetriever {
         }
     }
 
-    private Object retrieveByAnnotation(LambdaProxyRequest request,
-                                        Map<String, String> postParams,
-                                        Map<String, String> pathVariables) {
+    Object retrieveByAnnotation(LambdaProxyRequest request,
+                                Map<String, String> postParams,
+                                Map<String, String> pathVariables) {
         if (annotation instanceof RestQuery) {
             RestQuery restQuery = (RestQuery) annotation;
             String name = restQuery.value();
             String valueStr = request.getQueryStringParameters().get(name);
-            if (valueStr == null && restQuery.required()) {
-                throw new IllegalArgumentException(String.format("Request param:%s can't be null", name));
+            log.debug("getQueryParam:annotation={}name={},value={}", annotation, name, valueStr);
+            if (valueStr == null) {
+                if (restQuery.required()) {
+                    throw new IllegalArgumentException(String.format("Request param:%s can't be null", name));
+                } else {
+                    return null;
+                }
             }
             return restParamDeserializer.deserialize(valueStr, parameter.getType());
         }
@@ -54,8 +62,13 @@ class ParamRetriever {
             RestForm restForm = (RestForm) annotation;
             String name = restForm.value();
             String valueStr = postParams.get(name);
-            if (valueStr == null && restForm.required()) {
-                throw new IllegalArgumentException(String.format("Form param:%s can't be null", name));
+            log.debug("getFormParam:annotation={}name={},value={}", annotation, name, valueStr);
+            if (valueStr == null) {
+                if (restForm.required()) {
+                    throw new IllegalArgumentException(String.format("Form param:%s can't be null", name));
+                } else {
+                    return null;
+                }
             }
             return restParamDeserializer.deserialize(valueStr, parameter.getType());
         }
@@ -64,8 +77,13 @@ class ParamRetriever {
             RestPath restPath = (RestPath) annotation;
             String name = restPath.value();
             String valueStr = pathVariables.get(name);
-            if (valueStr == null && restPath.required()) {
-                throw new IllegalArgumentException(String.format("Path param:%s can't be null", name));
+            log.debug("getPathParam:annotation={}name={},value={}", annotation, name, valueStr);
+            if (valueStr == null) {
+                if (restPath.required()) {
+                    throw new IllegalArgumentException(String.format("Path param:%s can't be null", name));
+                } else {
+                    return null;
+                }
             }
             return restParamDeserializer.deserialize(valueStr, parameter.getType());
         }
@@ -74,8 +92,13 @@ class ParamRetriever {
             RestHeader restHeader = (RestHeader) annotation;
             String name = restHeader.value();
             String valueStr = request.getHeaders().get(name);
-            if (valueStr == null && restHeader.required()) {
-                throw new IllegalArgumentException(String.format("Request header:%s can't be null", name));
+            log.debug("getHeaderParam:annotation={}name={},value={}", annotation, name, valueStr);
+            if (valueStr == null) {
+                if (restHeader.required()) {
+                    throw new IllegalArgumentException(String.format("Request header:%s can't be null", name));
+                } else {
+                    return null;
+                }
             }
             return restParamDeserializer.deserialize(valueStr, parameter.getType());
         }

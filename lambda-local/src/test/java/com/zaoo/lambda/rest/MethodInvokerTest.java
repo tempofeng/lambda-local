@@ -58,6 +58,27 @@ public class MethodInvokerTest {
     }
 
     @Test
+    public void invoke_not_required() throws Exception {
+        Method method = TestRestFunction5.class.getMethod("hello", String.class, String.class);
+        MethodInvoker methodInvoker = new MethodInvoker(method, "/testRestPath5");
+        LambdaProxyRequest req = new LambdaProxyRequest();
+        req.setPath("/testRestPath5/");
+        req.setQueryStringParameters(ImmutableMap.of("firstName", "tempo"));
+        String response = (String) methodInvoker.invoke(new TestRestFunction5(), req);
+        assertThat(response).isEqualTo("tempo,null");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void invoke_required() throws Exception {
+        Method method = TestRestFunction5.class.getMethod("hello", String.class, String.class);
+        MethodInvoker methodInvoker = new MethodInvoker(method, "/testRestPath5");
+        LambdaProxyRequest req = new LambdaProxyRequest();
+        req.setPath("/testRestPath5/");
+        req.setQueryStringParameters(ImmutableMap.of("lastName", "feng"));
+        methodInvoker.invoke(new TestRestFunction5(), req);
+    }
+
+    @Test
     public void invoke_body() throws Exception {
         Method method = TestRestFunction2.class.getMethods()[0];
         MethodInvoker methodInvoker = new MethodInvoker(method, "/testRestPath2");
