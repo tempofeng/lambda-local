@@ -81,7 +81,11 @@ class ParamRetriever {
         }
 
         if (annotation instanceof RestBody) {
+            RestBody restBody = (RestBody) annotation;
             if (request.getBody() == null || request.getBody().isEmpty()) {
+                if (restBody.required()) {
+                    throw new IllegalArgumentException(String.format("Request body can't be null"));
+                }
                 return null;
             }
 
