@@ -4,6 +4,7 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableMap;
 import com.zaoo.lambda.*;
 import org.reflections.ReflectionUtils;
 import org.slf4j.Logger;
@@ -55,7 +56,9 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
                     methodInvoker.getMethodPath(),
                     methodInvoker.getHttpMethod());
             Object result = methodInvoker.invoke(this, input);
-            return new LambdaProxyResponse(objectMapper.writeValueAsString(result));
+            return new LambdaProxyResponse(200,
+                    ImmutableMap.of("Access-Control-Allow-Origin", "*"),
+                    objectMapper.writeValueAsString(result));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
