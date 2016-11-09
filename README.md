@@ -8,25 +8,12 @@ Lambda-Local 可以讓 Java 開發者：
 @LambdaLocal("/lleHelloRestService")
 public class HelloRestService extends AbstractLambdaRestService {
     @RestMethod(httpMethod = HttpMethod.GET, path = "/{firstName}/{lastName}")
-    public ResponseClass hello(@RestPath("firstName") String firstName,
+    public String hello(@RestPath("firstName") String firstName,
                                @RestPath("lastName") String lastName) {
-        String greetingString = String.format("Hello %s, %s!", firstName, lastName);
-        return new ResponseClass(greetingString);
-    }
-    
-    static class ResponseClass {
-        public final String greetings;
-
-        ResponseClass(String greetings) {
-            this.greetings = greetings;
-        }
+        return String.format("Hello %s, %s!", firstName, lastName);
     }
 }
 ```
-
-# Requirements
-
-Lambda-Local requires at minimum Java 8. 
 
 # Download
 
@@ -45,6 +32,10 @@ compile 'com.zaoo.lambda-local:lambda-local:{version}'
 * Using other build system:
 https://jitpack.io/#com.zaoo.lambda-local/lambda-local
 
+# Requirements
+
+Lambda-Local requires at minimum Java 8. 
+
 # Usage
 
-Please take a look at [our sample app](/tree/master/lambda-local-example).
+Please take a look at [our sample app](../tree/master/lambda-local-example).
