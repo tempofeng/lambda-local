@@ -4,7 +4,6 @@ import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.collect.ImmutableMap;
 import com.zaoo.lambda.*;
 import org.reflections.ReflectionUtils;
 import org.slf4j.Logger;
@@ -33,7 +32,7 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
         String lambdaLocalPath = lambdaLocal.value()[0];
 
         return ReflectionUtils.getMethods(cls, ReflectionUtils.withAnnotation(RestMethod.class)).stream()
-                .map(method -> new MethodInvoker(method, lambdaLocalPath))
+                .map(method -> new MethodInvoker(cls, method, lambdaLocalPath))
                 .collect(Collectors.toList());
     }
 

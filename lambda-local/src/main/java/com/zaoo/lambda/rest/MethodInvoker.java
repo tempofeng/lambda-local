@@ -29,7 +29,7 @@ class MethodInvoker {
     private final HttpMethod httpMethod;
     private final Map<String, String> headers;
 
-    MethodInvoker(Method method, String lambdaLocalPath) {
+    MethodInvoker(Class<?> cls, Method method, String lambdaLocalPath) {
         this.method = method;
         this.lambdaLocalPath = lambdaLocalPath;
 
@@ -37,7 +37,12 @@ class MethodInvoker {
         if (crossOrigin != null) {
             headers = ImmutableMap.of("Access-Control-Allow-Origin", crossOrigin.value());
         } else {
-            headers = Collections.emptyMap();
+            CrossOrigin classCrossOrigin = cls.getAnnotation(CrossOrigin.class);
+            if (classCrossOrigin != null) {
+                headers = ImmutableMap.of("Access-Control-Allow-Origin", classCrossOrigin.value());
+            } else {
+                headers = Collections.emptyMap();
+            }
         }
 
         RestMethod restMethod = method.getAnnotation(RestMethod.class);
