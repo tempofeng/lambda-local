@@ -32,7 +32,7 @@ https://jitpack.io/#com.zaoo.lambda-local/lambda-local
 # Requirements
 Lambda-Local requires at minimum Java 8. 
 
-# Quick Start
+# Usage
 
 ## A Simple Hello Rest Service
 1. Install Lambda-Local in your build file. Ex: Using Gradle:
@@ -100,6 +100,8 @@ Lambda-Local requires at minimum Java 8.
         ```
     1. You can also use Lambda-Local directly without `AbstractLambdaRestService` or `AbstractLambdaLocalRequestHandler` (But with more configurations to do).
         Please take a look at [our sample webapp](https://github.com/tempofeng/lambda-local/tree/master/lambda-local-example).
+        
+## Testing & Running the web app
 1. Testing on your local machine. Ex: Using Gradle and [Gretty plugin](https://github.com/akhikhl/gretty).
     1. In build.gradle, put:
         ```
@@ -115,7 +117,7 @@ Lambda-Local requires at minimum Java 8.
         > ./gradlew appRun
         ```
     1. Open http://localhost:8080/lleHelloRestService or http://localhost:8080/lleHelloLambdaProxy in your browser. (The path depends on your '@LambdaLocal.value')
-1. Testing on AWS Lambda and API Gateway
+1. Running on AWS Lambda and API Gateway
     1. Create a new AWS Lambda Function with default AWS API Gateway settings.
     1. Add {proxy+} to all the subpath of the Lambda Function in API Gateway.
  
