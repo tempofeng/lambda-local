@@ -2,7 +2,6 @@ package com.zaoo.lambda.rest;
 
 import com.google.common.collect.ImmutableMap;
 import com.zaoo.lambda.LambdaProxyRequest;
-import org.assertj.core.api.StringAssert;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
@@ -39,8 +38,10 @@ public class MethodInvokerTest {
         req.setQueryStringParameters(ImmutableMap.of("lastName", "feng"));
         req.setBody("firstName=tempo");
         req.setPath("/testRestPath1");
-        TestRestFunction1.Response func = (TestRestFunction1.Response) methodInvoker.invoke(new TestRestFunction1(),
-                req);
+        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction1(), req);
+        assertThat(result.statusCode).isEqualTo(200);
+        assertThat(result.headers).isEmpty();
+        TestRestFunction1.Response func = (TestRestFunction1.Response) result.result;
         assertThat(func.firstName).isEqualTo("tempo");
         assertThat(func.lastName).isEqualTo("feng");
         assertThat(func.userToken).isEqualTo("testUserToken");
@@ -52,8 +53,10 @@ public class MethodInvokerTest {
         MethodInvoker methodInvoker = new MethodInvoker(method, "/testRestPath4");
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setPath("/testRestPath4/test/tempo");
-        String response = (String) methodInvoker.invoke(new TestRestFunction4(),
-                req);
+        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction4(), req);
+        assertThat(result.statusCode).isEqualTo(200);
+        assertThat(result.headers).isEmpty();
+        String response = (String) result.result;
         assertThat(response).isEqualTo("tempo");
     }
 
@@ -64,8 +67,25 @@ public class MethodInvokerTest {
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setPath("/testRestPath5/");
         req.setQueryStringParameters(ImmutableMap.of("firstName", "tempo"));
-        String response = (String) methodInvoker.invoke(new TestRestFunction5(), req);
+        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction5(), req);
+        assertThat(result.statusCode).isEqualTo(200);
+        assertThat(result.headers).isEmpty();
+        String response = (String) result.result;
         assertThat(response).isEqualTo("tempo,null");
+    }
+
+    @Test
+    public void invoke_cross_origin() throws Exception {
+        Method method = TestRestFunction6.class.getMethod("test1");
+        MethodInvoker methodInvoker = new MethodInvoker(method, "/testRestPath6");
+        LambdaProxyRequest req = new LambdaProxyRequest();
+        req.setPath("/testRestPath6/");
+        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction6(), req);
+        assertThat(result.statusCode).isEqualTo(200);
+        assertThat(result.headers.size()).isEqualTo(1);
+        assertThat(result.headers.get("Access-Control-Allow-Origin")).isEqualTo("*");
+        String response = (String) result.result;
+        assertThat(response).isEqualTo("test1");
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -89,8 +109,10 @@ public class MethodInvokerTest {
         req.setQueryStringParameters(ImmutableMap.of("firstName", "tempo", "lastName", "feng"));
         req.setBody("{\"addr\":\"台北市\",\"mobile\":\"12345\"}");
         req.setPath("/testRestPath2");
-        TestRestFunction2.Response func = (TestRestFunction2.Response) methodInvoker.invoke(new TestRestFunction2(),
-                req);
+        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction2(), req);
+        assertThat(result.statusCode).isEqualTo(200);
+        assertThat(result.headers).isEmpty();
+        TestRestFunction2.Response func = (TestRestFunction2.Response) result.result;
         assertThat(func.firstName).isEqualTo("tempo");
         assertThat(func.lastName).isEqualTo("feng");
         assertThat(func.userToken).isEqualTo("testUserToken");
@@ -124,8 +146,10 @@ public class MethodInvokerTest {
         req.setQueryStringParameters(map);
         req.setBody("{\"addr\":\"台北市\",\"mobile\":\"12345\"}");
         req.setPath("/testRestPath3");
-        TestRestFunction3.Response func = (TestRestFunction3.Response) methodInvoker.invoke(new TestRestFunction3(),
-                req);
+        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction3(), req);
+        assertThat(result.statusCode).isEqualTo(200);
+        assertThat(result.headers).isEmpty();
+        TestRestFunction3.Response func = (TestRestFunction3.Response) result.result;
         assertThat(func.key1).isEqualTo("value1");
         assertThat(func.key2).isEqualTo(2);
         assertThat(func.key3).isEqualTo(3);

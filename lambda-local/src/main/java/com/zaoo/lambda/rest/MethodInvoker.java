@@ -1,6 +1,7 @@
 package com.zaoo.lambda.rest;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableMap;
 import com.zaoo.lambda.LambdaProxyRequest;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -26,10 +27,19 @@ class MethodInvoker {
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
     private final String methodPath;
     private final HttpMethod httpMethod;
+    private final Map<String, String> headers;
 
     MethodInvoker(Method method, String lambdaLocalPath) {
         this.method = method;
         this.lambdaLocalPath = lambdaLocalPath;
+
+        CrossOrigin crossOrigin = method.getAnnotation(CrossOrigin.class);
+        if (crossOrigin != null) {
+            headers = ImmutableMap.of("Access-Control-Allow-Origin", crossOrigin.value());
+        } else {
+            headers = Collections.emptyMap();
+        }
+
         RestMethod restMethod = method.getAnnotation(RestMethod.class);
         methodPath = restMethod.path();
         httpMethod = restMethod.httpMethod();
@@ -77,15 +87,16 @@ class MethodInvoker {
                 annotation instanceof RestPath;
     }
 
-    Object invoke(Object obj, LambdaProxyRequest request) throws InvocationTargetException {
-        final Map<String, String> postParams = parsePostParameters(request);
+    Result invoke(Object obj, LambdaProxyRequest request) throws InvocationTargetException {
+        Map<String, String> postParams = parsePostParameters(request);
         Map<String, String> pathVariables = pathMatcher.extractUriTemplateVariables(methodPath,
                 getRestMethodPath(request));
         try {
             List<Object> args = paramRetrievers.stream()
                     .map(paramRetriever -> paramRetriever.retrieve(request, postParams, pathVariables))
                     .collect(toList());
-            return method.invoke(obj, args.toArray());
+            Object result = method.invoke(obj, args.toArray());
+            return new Result(200, result, headers);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
@@ -159,17 +170,29 @@ class MethodInvoker {
                 input.getPath().substring(lambdaLocalPath.length());
     }
 
-    static class ErrorRestParamDeserializer implements RestParamDeserializer<Object> {
+    private static class ErrorRestParamDeserializer implements RestParamDeserializer<Object> {
         @Override
         public Object deserialize(String str, Class<?> cls) {
             throw new IllegalArgumentException("Unable to get RestParamDeserializer of this type:" + cls);
         }
     }
 
-    static class ErrorAnnotation implements Annotation {
+    private static class ErrorAnnotation implements Annotation {
         @Override
         public Class<? extends Annotation> annotationType() {
             throw new IllegalArgumentException("Unable to get annotation type");
+        }
+    }
+
+    static class Result {
+        public final int statusCode;
+        public final Object result;
+        public final Map<String, String> headers;
+
+        public Result(int statusCode, Object result, Map<String, String> headers) {
+            this.statusCode = statusCode;
+            this.result = result;
+            this.headers = headers;
         }
     }
 }

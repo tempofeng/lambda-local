@@ -55,10 +55,10 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
             log.debug("invokeMethod:methodPath={},httpMethod={}",
                     methodInvoker.getMethodPath(),
                     methodInvoker.getHttpMethod());
-            Object result = methodInvoker.invoke(this, input);
-            return new LambdaProxyResponse(200,
-                    ImmutableMap.of("Access-Control-Allow-Origin", "*"),
-                    objectMapper.writeValueAsString(result));
+            MethodInvoker.Result result = methodInvoker.invoke(this, input);
+            return new LambdaProxyResponse(result.statusCode,
+                    result.headers,
+                    objectMapper.writeValueAsString(result.result));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
