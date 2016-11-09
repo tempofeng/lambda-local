@@ -1,7 +1,6 @@
 # Lambda-Local
 
 Lambda-Local 可以讓 Java 開發者：
-
 * 使用同一套程式碼，可以方便的在自己的電腦開發 AWS Lambda function，不用每次都 Deploy 到 AWS 測試
 * 可以透過如 Spring MVC 的方式開發 Rest Service，如：
 ```Java
@@ -16,11 +15,10 @@ public class HelloRestService extends AbstractLambdaRestService {
 ```
 
 # Download
-
 [![Release](https://jitpack.io/v/com.zaoo.lambda-local/Repo.svg?style=flat-square)](https://jitpack.io/#com.example/Repo)
 
 * Using Gradle:
-```
+```Gradle
 repositories {
     maven { url "https://jitpack.io" }
 }
@@ -32,22 +30,22 @@ compile 'com.zaoo.lambda-local:lambda-local:{version}'
 https://jitpack.io/#com.zaoo.lambda-local/lambda-local
 
 # Requirements
-
 Lambda-Local requires at minimum Java 8. 
 
 # Quick Start
 
 ## A Simple Hello Rest Service
-1. Install 'Lambda-Local' into your build file. Ex (Gradle):
-    ```
+1. Install Lambda-Local in your build file. Ex: Using Gradle:
+    ```Gradle
     repositories {
         maven { url "https://jitpack.io" }
     }
     
     compile 'com.zaoo.lambda-local:lambda-local:{version}'
     ```
-1. Add a 'WEB-INF/web.xml'. 
-    ```XML
+    
+1. Add a `WEB-INF/web.xml`.
+    ```xml
     <?xml version="1.0" encoding="UTF-8"?>
     <web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -67,10 +65,11 @@ Lambda-Local requires at minimum Java 8.
             <url-pattern>/</url-pattern>
         </servlet-mapping>
     </web-app>
-    ```
-    Please note that we need to provide your package name as the init-param, and we will scan that package and its sub-package for all classes annotated with @LambdaLocal.
+    ```    
+    Provide your package name as the `init-param`, and Lambda-Local will scan that package and its sub-package for all classes annotated with '@LambdaLocal'.
+
 1. Create your first [AWS Lambda Function Handler](http://docs.aws.amazon.com/lambda/latest/dg/java-programming-model-handler-types.html).
-    1. If you're building JSON rest services, you can extend AbstractLambdaRestService and using annotation to define your rest services by method (Like Spring MVC). Ex:
+    1. If you're building JSON REST services, you can extend `AbstractLambdaRestService` and use annotations to define your REST services by method (Like Spring MVC). Ex:
         ```Java
         @LambdaLocal("/lleHelloRestService")
         public class HelloRestService extends AbstractLambdaRestService {
@@ -82,12 +81,12 @@ Lambda-Local requires at minimum Java 8.
         }
         ```
         Please note that:
-        * '@LambdaLocal.value' must be the same as your Lambda Function name.
+        * `@LambdaLocal.value` must be the same as your Lambda Function name.
         * Annotations:
-         * '@RestPath': The parameter is bound to a URI template variable.
-        * We're using Jackson to convert Object <-> JSON.
+         * `@RestPath`: The parameter is bound to a URI template variable.
+        * Lambda-Local using Jackson to convert Object <-> JSON.
          
-    1. If you have setup AWS Lambda using proxy request, you can extend AbstractLambdaLocalRequestHandler to process the pre-defined proxy request and response.
+    1. If you have setup AWS Lambda using proxy request, you can extend `AbstractLambdaLocalRequestHandler` to process the pre-defined proxy request and response.
         ```Java
         @LambdaLocal("/lleHelloLambdaProxy")
         public class HelloLambdaProxy extends AbstractLambdaLocalRequestHandler {
@@ -99,7 +98,7 @@ Lambda-Local requires at minimum Java 8.
             }
         }
         ```
-    1. You can also use @LambdaLocal directly without AbstractLambdaRestService or AbstractLambdaLocalRequestHandler (But with more configuration to do).
+    1. You can also use Lambda-Local directly without `AbstractLambdaRestService` or `AbstractLambdaLocalRequestHandler` (But with more configurations to do).
         Please take a look at [our sample webapp](https://github.com/tempofeng/lambda-local/tree/master/lambda-local-example).
 1. Testing on your local machine. Ex: Using Gradle and [Gretty plugin](https://github.com/akhikhl/gretty).
     1. In build.gradle, put:
@@ -115,7 +114,7 @@ Lambda-Local requires at minimum Java 8.
         ```
         > ./gradlew appRun
         ```
-    1. Open http://localhost:8080/lleHelloRestService or http://localhost:8080/lleHelloLambdaProxy in browser. (depends on your '@LambdaLocal.value')
+    1. Open http://localhost:8080/lleHelloRestService or http://localhost:8080/lleHelloLambdaProxy in your browser. (The path depends on your '@LambdaLocal.value')
 1. Testing on AWS Lambda and API Gateway
     1. Create a new AWS Lambda Function with default AWS API Gateway settings.
     1. Add {proxy+} to all the subpath of the Lambda Function in API Gateway.
