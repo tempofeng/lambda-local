@@ -5,19 +5,19 @@ import com.zaoo.lambda.LambdaLocal;
 @LambdaLocal("/testRestPath3")
 public class TestRestFunction3 {
     @RestMethod(httpMethod = HttpMethod.GET, path = "/")
-    public Response hello(@RestQuery("key1") String value1,
-                          @RestQuery("key2") Integer value2,
-                          @RestQuery("key3") int value3,
-                          @RestQuery("key4") Long value4,
-                          @RestQuery("key5") long value5,
-                          @RestQuery("key6") Float value6,
-                          @RestQuery("key7") float value7,
-                          @RestQuery("key8") Double value8,
-                          @RestQuery("key9") double value9,
-                          @RestQuery("key10") Boolean value10,
-                          @RestQuery("key11") boolean value11,
-                          @RestQuery("gender") Gender gender,
-                          @RestQuery(value = "customClass", deserializer = CustomRestParamDeserializer.class) CustomClass customClass) {
+    public Response hello(@RestParam("key1") String value1,
+                          @RestParam("key2") Integer value2,
+                          @RestParam("key3") int value3,
+                          @RestParam("key4") Long value4,
+                          @RestParam("key5") long value5,
+                          @RestParam("key6") Float value6,
+                          @RestParam("key7") float value7,
+                          @RestParam("key8") Double value8,
+                          @RestParam("key9") double value9,
+                          @RestParam("key10") Boolean value10,
+                          @RestParam("key11") boolean value11,
+                          @RestParam("gender") Gender gender,
+                          @RestParam(value = "customClass", deserializer = CustomRestParamDeserializer.class) CustomClass customClass) {
         return new Response(value1,
                 value2,
                 value3,

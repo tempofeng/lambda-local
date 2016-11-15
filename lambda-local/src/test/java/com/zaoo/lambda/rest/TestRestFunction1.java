@@ -5,8 +5,8 @@ import com.zaoo.lambda.LambdaLocal;
 @LambdaLocal("/testRestPath1")
 public class TestRestFunction1 {
     @RestMethod(httpMethod = HttpMethod.POST, path = "/")
-    public Response hello(@RestForm("firstName") String firstName,
-                          @RestQuery("lastName") String lastName,
+    public Response hello(@RestParam("firstName") String firstName,
+                          @RestParam("lastName") String lastName,
                           @RestHeader("userToken") String userToken) {
         return new Response(firstName, lastName, userToken);
     }

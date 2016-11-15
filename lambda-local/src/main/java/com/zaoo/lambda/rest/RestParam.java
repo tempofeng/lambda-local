@@ -5,12 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Only supported when Content-Type = 'application/x-www-form-urlencoded'
- */
 @Target({ElementType.PARAMETER})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RestForm {
+public @interface RestParam {
     String value();
 
     boolean required() default true;

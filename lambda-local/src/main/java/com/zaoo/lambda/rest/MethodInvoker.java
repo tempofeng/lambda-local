@@ -85,10 +85,9 @@ class MethodInvoker {
     }
 
     private boolean isRestAnnotation(Annotation annotation) {
-        return annotation instanceof RestQuery ||
+        return annotation instanceof RestParam ||
                 annotation instanceof RestHeader ||
                 annotation instanceof RestBody ||
-                annotation instanceof RestForm ||
                 annotation instanceof RestPath;
     }
 
@@ -127,14 +126,9 @@ class MethodInvoker {
     }
 
     private RestParamDeserializer createDeserializer(Annotation annotation) {
-        if (annotation instanceof RestQuery) {
-            RestQuery restQuery = (RestQuery) annotation;
-            return createDeserializer(restQuery.deserializer());
-        }
-
-        if (annotation instanceof RestForm) {
-            RestForm restForm = (RestForm) annotation;
-            return createDeserializer(restForm.deserializer());
+        if (annotation instanceof RestParam) {
+            RestParam restParam = (RestParam) annotation;
+            return createDeserializer(restParam.deserializer());
         }
 
         if (annotation instanceof RestPath) {

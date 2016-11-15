@@ -45,29 +45,19 @@ class ParamRetriever {
                                 Map<String, String> pathVariables) {
         log.debug("retrieveByAnnotation:post={},path={}", postParams, pathVariables);
 
-        if (annotation instanceof RestQuery) {
-            RestQuery restQuery = (RestQuery) annotation;
-            String name = restQuery.value();
-            String valueStr = request.getQueryStringParameters().get(name);
+        if (annotation instanceof RestParam) {
+            RestParam restParam = (RestParam) annotation;
+            String name = restParam.value();
+            // Read from both post data and query string
+            String valueStr = postParams.get(name);
+            if (valueStr == null) {
+                valueStr = request.getQueryStringParameters().get(name);
+            }
+
             log.debug("getQueryParam:annotation={},name={},value={}", annotation, name, valueStr);
             if (valueStr == null) {
-                if (restQuery.required()) {
+                if (restParam.required()) {
                     throw new IllegalArgumentException(String.format("Request param:%s can't be null", name));
-                } else {
-                    return null;
-                }
-            }
-            return restParamDeserializer.deserialize(valueStr, parameter.getType());
-        }
-
-        if (annotation instanceof RestForm) {
-            RestForm restForm = (RestForm) annotation;
-            String name = restForm.value();
-            String valueStr = postParams.get(name);
-            log.debug("getFormParam:annotation={},name={},value={}", annotation, name, valueStr);
-            if (valueStr == null) {
-                if (restForm.required()) {
-                    throw new IllegalArgumentException(String.format("Form param:%s can't be null", name));
                 } else {
                     return null;
                 }
