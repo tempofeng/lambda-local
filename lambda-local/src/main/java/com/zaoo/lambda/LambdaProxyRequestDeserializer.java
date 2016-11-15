@@ -28,8 +28,7 @@ public class LambdaProxyRequestDeserializer implements LambdaRequestDeserializer
                 toHeaders(req),
                 toParameters(req),
                 requestContext,
-                IOUtils.toString(req.getInputStream(),
-                        req.getCharacterEncoding() != null ? req.getCharacterEncoding() : UTF_8));
+                IOUtils.toString(req.getReader()));
     }
 
     private Map<String, String> toHeaders(HttpServletRequest req) {

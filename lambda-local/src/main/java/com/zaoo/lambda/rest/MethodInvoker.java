@@ -109,19 +109,16 @@ class MethodInvoker {
     Map<String, String> parsePostParameters(LambdaProxyRequest request) {
         String contentType = request.getHeaders().get("Content-Type");
         if (!"application/x-www-form-urlencoded".equals(contentType)) {
-            log.debug("noPostParameters:contentType={}", contentType);
             return Collections.emptyMap();
         }
 
         String body = request.getBody();
         if (Strings.isNullOrEmpty(body)) {
-            log.debug("noPostParameters:body is empty");
             return Collections.emptyMap();
         }
 
         Map<String, String> postParams = URLEncodedUtils.parse(body, Charset.forName("UTF-8")).stream()
                 .collect(Collectors.toMap(NameValuePair::getName, NameValuePair::getValue));
-        log.debug("postParameters:{}", postParams);
         return postParams;
     }
 

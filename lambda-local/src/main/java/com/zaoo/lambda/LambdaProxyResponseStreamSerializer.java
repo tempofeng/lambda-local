@@ -15,9 +15,11 @@ public class LambdaProxyResponseStreamSerializer implements LambdaStreamResponse
     public void deserialize(byte[] output, HttpServletResponse resp) throws IOException {
         LambdaProxyResponse response = objectMapper.readValue(output, LambdaProxyResponse.class);
         resp.setStatus(response.getStatusCode());
+        resp.setCharacterEncoding(UTF_8);
         for (Map.Entry<String, String> entry : response.getHeaders().entrySet()) {
             resp.addHeader(entry.getKey(), entry.getValue());
         }
-        IOUtils.write(response.getBody(), resp.getOutputStream(), UTF_8);
+        IOUtils.write(response.getBody(), resp.getWriter());
+        resp.getWriter().flush();
     }
 }
