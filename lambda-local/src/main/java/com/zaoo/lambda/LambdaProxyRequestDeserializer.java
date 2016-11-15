@@ -8,7 +8,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class LambdaProxyRequestDeserializer implements LambdaRequestDeserializer<LambdaProxyRequest> {
-    private static final String UTF_8 = "UTF-8";
     private static final String USER_AGENT = "User-Agent";
 
     @Override
@@ -28,7 +27,15 @@ public class LambdaProxyRequestDeserializer implements LambdaRequestDeserializer
                 toHeaders(req),
                 toParameters(req),
                 requestContext,
-                IOUtils.toString(req.getReader()));
+                readBody(req));
+    }
+
+    private String readBody(HttpServletRequest req) {
+        try {
+            return IOUtils.toString(req.getReader());
+        } catch (IOException | IllegalStateException e) {
+            return "";
+        }
     }
 
     private Map<String, String> toHeaders(HttpServletRequest req) {
