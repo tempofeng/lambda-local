@@ -43,11 +43,13 @@ class ParamRetriever {
     Object retrieveByAnnotation(LambdaProxyRequest request,
                                 Map<String, String> postParams,
                                 Map<String, String> pathVariables) {
+        log.debug("retrieveByAnnotation:post={},path={}", postParams, pathVariables);
+
         if (annotation instanceof RestQuery) {
             RestQuery restQuery = (RestQuery) annotation;
             String name = restQuery.value();
             String valueStr = request.getQueryStringParameters().get(name);
-            log.debug("getQueryParam:annotation={}name={},value={}", annotation, name, valueStr);
+            log.debug("getQueryParam:annotation={},name={},value={}", annotation, name, valueStr);
             if (valueStr == null) {
                 if (restQuery.required()) {
                     throw new IllegalArgumentException(String.format("Request param:%s can't be null", name));
@@ -62,7 +64,7 @@ class ParamRetriever {
             RestForm restForm = (RestForm) annotation;
             String name = restForm.value();
             String valueStr = postParams.get(name);
-            log.debug("getFormParam:annotation={}name={},value={}", annotation, name, valueStr);
+            log.debug("getFormParam:annotation={},name={},value={}", annotation, name, valueStr);
             if (valueStr == null) {
                 if (restForm.required()) {
                     throw new IllegalArgumentException(String.format("Form param:%s can't be null", name));
@@ -77,7 +79,7 @@ class ParamRetriever {
             RestPath restPath = (RestPath) annotation;
             String name = restPath.value();
             String valueStr = pathVariables.get(name);
-            log.debug("getPathParam:annotation={}name={},value={}", annotation, name, valueStr);
+            log.debug("getPathParam:annotation={},name={},value={}", annotation, name, valueStr);
             if (valueStr == null) {
                 if (restPath.required()) {
                     throw new IllegalArgumentException(String.format("Path param:%s can't be null", name));
@@ -92,7 +94,7 @@ class ParamRetriever {
             RestHeader restHeader = (RestHeader) annotation;
             String name = restHeader.value();
             String valueStr = request.getHeaders().get(name);
-            log.debug("getHeaderParam:annotation={}name={},value={}", annotation, name, valueStr);
+            log.debug("getHeaderParam:annotation={},name={},value={}", annotation, name, valueStr);
             if (valueStr == null) {
                 if (restHeader.required()) {
                     throw new IllegalArgumentException(String.format("Request header:%s can't be null", name));
