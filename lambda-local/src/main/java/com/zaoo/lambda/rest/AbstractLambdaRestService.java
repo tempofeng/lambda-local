@@ -44,9 +44,33 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
                 return invokeMethod(methodInvoker, input);
             }
         }
+
+        // CORS pre-flight requests
+        String accessControlRequestMethod = input.getHeaders().get("Access-Control-Request-Method");
+        if (httpMethod == HttpMethod.OPTIONS && accessControlRequestMethod != null) {
+            // Use AccessControlRequestMethod as HttpMethod
+            input.setHttpMethod(accessControlRequestMethod.toUpperCase());
+            for (MethodInvoker methodInvoker : methodInvokers) {
+                if (methodInvoker.match(input)) {
+                    return invokeCorsPreflightMethod(methodInvoker);
+                }
+            }
+        }
+
         throw new IllegalArgumentException(String.format("Unhandled request:path=%s,method=%s",
                 input.getPath(),
                 httpMethod));
+    }
+
+    private LambdaProxyResponse invokeCorsPreflightMethod(MethodInvoker methodInvoker) {
+        try {
+            MethodInvoker.Result result = methodInvoker.invokeCorsPreflight();
+            return new LambdaProxyResponse(result.statusCode,
+                    result.headers,
+                    objectMapper.writeValueAsString(result.result));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private LambdaProxyResponse invokeMethod(MethodInvoker methodInvoker, LambdaProxyRequest input) {

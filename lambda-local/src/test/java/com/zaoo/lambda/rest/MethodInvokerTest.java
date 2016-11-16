@@ -82,8 +82,12 @@ public class MethodInvokerTest {
         req.setPath("/testRestPath6/");
         MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction6(), req);
         assertThat(result.statusCode).isEqualTo(200);
-        assertThat(result.headers.size()).isEqualTo(1);
+
+        assertThat(result.headers.size()).isEqualTo(3);
         assertThat(result.headers.get("Access-Control-Allow-Origin")).isEqualTo("*");
+        assertThat(result.headers.get("Access-Control-Allow-Methods")).isEqualTo("GET, POST, HEAD, OPTIONS");
+        assertThat(result.headers.get("Access-Control-Allow-Headers")).isEqualTo("*");
+
         String response = (String) result.result;
         assertThat(response).isEqualTo("test1");
     }
@@ -96,8 +100,12 @@ public class MethodInvokerTest {
         req.setPath("/testRestPath7/");
         MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction7(), req);
         assertThat(result.statusCode).isEqualTo(200);
-        assertThat(result.headers.size()).isEqualTo(1);
+
+        assertThat(result.headers.size()).isEqualTo(3);
         assertThat(result.headers.get("Access-Control-Allow-Origin")).isEqualTo("*");
+        assertThat(result.headers.get("Access-Control-Allow-Methods")).isEqualTo("GET, POST, HEAD, OPTIONS");
+        assertThat(result.headers.get("Access-Control-Allow-Headers")).isEqualTo("*");
+
         String response = (String) result.result;
         assertThat(response).isEqualTo("test1");
     }

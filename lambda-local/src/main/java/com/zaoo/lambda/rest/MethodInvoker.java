@@ -112,6 +112,10 @@ class MethodInvoker {
         }
     }
 
+    Result invokeCorsPreflight() {
+        return new Result(200, Collections.emptyMap(), headers);
+    }
+
     Map<String, String> parsePostParameters(LambdaProxyRequest request) {
         String contentType = request.getHeaders().get("Content-Type");
         if (!"application/x-www-form-urlencoded".equals(contentType)) {

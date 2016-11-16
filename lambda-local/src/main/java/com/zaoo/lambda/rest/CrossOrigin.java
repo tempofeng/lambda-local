@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 public @interface CrossOrigin {
     String value() default "*";
 
-    String allowedHeaders() default "x-http-method-override";
+    String allowedHeaders() default "*";
 
-    String allowMethods() default "POST, GET, UPDATE, OPTIONS";
+    String allowMethods() default "GET, POST, HEAD, OPTIONS";
 }
