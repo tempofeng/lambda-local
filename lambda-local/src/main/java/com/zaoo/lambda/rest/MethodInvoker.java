@@ -35,11 +35,11 @@ class MethodInvoker {
 
         CrossOrigin crossOrigin = method.getAnnotation(CrossOrigin.class);
         if (crossOrigin != null) {
-            headers = ImmutableMap.of("Access-Control-Allow-Origin", crossOrigin.value());
+            headers = createCrossOriginHeaders(crossOrigin);
         } else {
             CrossOrigin classCrossOrigin = cls.getAnnotation(CrossOrigin.class);
             if (classCrossOrigin != null) {
-                headers = ImmutableMap.of("Access-Control-Allow-Origin", classCrossOrigin.value());
+                headers = createCrossOriginHeaders(classCrossOrigin);
             } else {
                 headers = Collections.emptyMap();
             }
@@ -74,6 +74,12 @@ class MethodInvoker {
                         parameter.getName()));
             }
         }
+    }
+
+    private Map<String, String> createCrossOriginHeaders(CrossOrigin classCrossOrigin) {
+        return ImmutableMap.of("Access-Control-Allow-Origin", classCrossOrigin.value(),
+                "Access-Control-Allow-Methods", classCrossOrigin.allowMethods(),
+                "Access-Control-Allow-Headers", classCrossOrigin.allowedHeaders());
     }
 
     public String getMethodPath() {

@@ -9,4 +9,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CrossOrigin {
     String value() default "*";
+
+    String allowedHeaders() default "x-http-method-override";
+
+    String allowMethods() default "POST, GET, UPDATE, OPTIONS";
 }
