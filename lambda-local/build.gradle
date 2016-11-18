@@ -15,7 +15,6 @@ dependencies {
 
     // aws lambda
     compile rootProject.ext.awsLambdaJavaCore
-    compile rootProject.ext.awsLambdaJavaEvents
 
     // hc
     compile rootProject.ext.httpCore
