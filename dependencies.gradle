@@ -17,7 +17,7 @@ ext {
     // guava
     guava = 'com.google.guava:guava:19.0'
 
-    httpCore = 'org.apache.httpcomponents:httpcore:4.4.5'
+    httpClient = 'org.apache.httpcomponents:httpclient:4.5.2'
 
     // jackson
     jacksonCore = 'com.fasterxml.jackson.core:jackson-core:2.8.4'

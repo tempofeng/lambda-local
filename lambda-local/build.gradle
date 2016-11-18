@@ -17,7 +17,7 @@ dependencies {
     compile rootProject.ext.awsLambdaJavaCore
 
     // hc
-    compile rootProject.ext.httpCore
+    compile rootProject.ext.httpClient
 
     // jackson
     compile rootProject.ext.jacksonCore
