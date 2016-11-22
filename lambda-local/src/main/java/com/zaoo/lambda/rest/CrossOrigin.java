@@ -12,5 +12,5 @@ public @interface CrossOrigin {
 
     String allowedHeaders() default "*";
 
-    String allowMethods() default "GET, POST, HEAD, OPTIONS";
+    String allowMethods() default "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE";
 }
