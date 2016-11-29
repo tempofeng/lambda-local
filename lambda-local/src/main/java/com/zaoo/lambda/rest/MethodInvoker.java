@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.AntPathMatcher;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.nio.charset.Charset;
@@ -110,6 +111,15 @@ class MethodInvoker {
                     .collect(toList());
             Object result = method.invoke(obj, args.toArray());
             return new Result(200, result, headers);
+        } catch (InvocationTargetException e) {
+            log.error(e.getLocalizedMessage(), e);
+            Error error;
+            if (e.getCause() != null) {
+                error = new Error(e.getCause().getLocalizedMessage(), e.getCause());
+            } else {
+                error = new Error(e.getLocalizedMessage(), e);
+            }
+            return new Result(500, error, headers);
         } catch (Exception e) {
             log.error(e.getLocalizedMessage(), e);
             Error error = new Error(e.getLocalizedMessage(), e);
