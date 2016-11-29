@@ -1,11 +1,9 @@
 package com.zaoo.lambda.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.zaoo.lambda.LambdaProxyRequest;
-import com.zaoo.lambda.ObjectMappers;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.slf4j.Logger;
@@ -31,7 +29,6 @@ class MethodInvoker {
     private final String methodPath;
     private final HttpMethod httpMethod;
     private final Map<String, String> headers;
-    private final ObjectMapper objectMapper = ObjectMappers.getInstance();
 
     MethodInvoker(Class<?> cls, Method method, String lambdaLocalPath) {
         this.method = method;
@@ -110,7 +107,7 @@ class MethodInvoker {
                     .map(paramRetriever -> paramRetriever.retrieve(request, postParams, pathVariables))
                     .collect(toList());
             Object result = method.invoke(obj, args.toArray());
-            return new Result(200, result, headers);
+            return new Result(200, result, getCrossOriginHeaders(request));
         } catch (InvocationTargetException e) {
             log.error(e.getLocalizedMessage(), e);
             Error error;
@@ -119,16 +116,30 @@ class MethodInvoker {
             } else {
                 error = new Error(e.getLocalizedMessage(), e);
             }
-            return new Result(500, error, headers);
+            return new Result(500, error, getCrossOriginHeaders(request));
         } catch (Exception e) {
             log.error(e.getLocalizedMessage(), e);
             Error error = new Error(e.getLocalizedMessage(), e);
-            return new Result(500, error, headers);
+            return new Result(500, error, getCrossOriginHeaders(request));
         }
     }
 
-    Result invokeCorsPreflight() {
-        return new Result(200, Collections.emptyMap(), headers);
+    private Map<String, String> getCrossOriginHeaders(LambdaProxyRequest request) {
+        if ("*".equals(headers.get("Access-Control-Allow-Headers"))) {
+            // Access-Control-Request-Headers can't be '*'
+            // http://stackoverflow.com/questions/13146892/cors-access-control-allow-headers-wildcard-being-ignored
+            String accessControlRequestHeaders = request.getHeaders().get("Access-Control-Request-Headers");
+            if (!Strings.isNullOrEmpty(accessControlRequestHeaders)) {
+                HashMap<String, String> newHeaders = new HashMap<>(headers);
+                newHeaders.put("Access-Control-Allow-Headers", accessControlRequestHeaders);
+                return Collections.unmodifiableMap(newHeaders);
+            }
+        }
+        return headers;
+    }
+
+    Result invokeCorsPreflight(LambdaProxyRequest request) {
+        return new Result(200, Collections.emptyMap(), getCrossOriginHeaders(request));
     }
 
     Map<String, String> parsePostParameters(LambdaProxyRequest request) {

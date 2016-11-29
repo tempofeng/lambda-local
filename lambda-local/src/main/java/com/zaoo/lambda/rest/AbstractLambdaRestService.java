@@ -52,7 +52,7 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
             input.setHttpMethod(accessControlRequestMethod.toUpperCase());
             for (MethodInvoker methodInvoker : methodInvokers) {
                 if (methodInvoker.match(input)) {
-                    return invokeCorsPreflightMethod(methodInvoker);
+                    return invokeCorsPreflightMethod(methodInvoker, input);
                 }
             }
         }
@@ -62,9 +62,9 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
                 httpMethod));
     }
 
-    private LambdaProxyResponse invokeCorsPreflightMethod(MethodInvoker methodInvoker) {
+    private LambdaProxyResponse invokeCorsPreflightMethod(MethodInvoker methodInvoker, LambdaProxyRequest input) {
         try {
-            MethodInvoker.Result result = methodInvoker.invokeCorsPreflight();
+            MethodInvoker.Result result = methodInvoker.invokeCorsPreflight(input);
             return new LambdaProxyResponse(result.statusCode,
                     result.headers,
                     objectMapper.writeValueAsString(result.result));

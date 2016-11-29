@@ -85,8 +85,29 @@ public class MethodInvokerTest {
 
         assertThat(result.headers.size()).isEqualTo(3);
         assertThat(result.headers.get("Access-Control-Allow-Origin")).isEqualTo("*");
-        assertThat(result.headers.get("Access-Control-Allow-Methods")).isEqualTo("GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE");
+        assertThat(result.headers.get("Access-Control-Allow-Methods")).isEqualTo(
+                "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE");
         assertThat(result.headers.get("Access-Control-Allow-Headers")).isEqualTo("*");
+
+        String response = (String) result.result;
+        assertThat(response).isEqualTo("test1");
+    }
+
+    @Test
+    public void invoke_cross_origin_allow_headers() throws Exception {
+        Method method = TestRestFunction6.class.getMethod("test1");
+        MethodInvoker methodInvoker = new MethodInvoker(TestRestFunction6.class, method, "/testRestPath6");
+        LambdaProxyRequest req = new LambdaProxyRequest();
+        req.setPath("/testRestPath6/");
+        req.setHeaders(ImmutableMap.of("Access-Control-Request-Headers", "Content-Type"));
+        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction6(), req);
+        assertThat(result.statusCode).isEqualTo(200);
+
+        assertThat(result.headers.size()).isEqualTo(3);
+        assertThat(result.headers.get("Access-Control-Allow-Origin")).isEqualTo("*");
+        assertThat(result.headers.get("Access-Control-Allow-Methods")).isEqualTo(
+                "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE");
+        assertThat(result.headers.get("Access-Control-Allow-Headers")).isEqualTo("Content-Type");
 
         String response = (String) result.result;
         assertThat(response).isEqualTo("test1");
@@ -103,7 +124,8 @@ public class MethodInvokerTest {
 
         assertThat(result.headers.size()).isEqualTo(3);
         assertThat(result.headers.get("Access-Control-Allow-Origin")).isEqualTo("*");
-        assertThat(result.headers.get("Access-Control-Allow-Methods")).isEqualTo("GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE");
+        assertThat(result.headers.get("Access-Control-Allow-Methods")).isEqualTo(
+                "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE");
         assertThat(result.headers.get("Access-Control-Allow-Headers")).isEqualTo("*");
 
         String response = (String) result.result;
@@ -121,7 +143,8 @@ public class MethodInvokerTest {
         MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction5(), req);
 
         assertThat(result.statusCode).isEqualTo(500);
-        assertThat(((MethodInvoker.Error)result.result).getExceptionClass()).isEqualTo("java.lang.IllegalArgumentException");
+        assertThat(((MethodInvoker.Error) result.result).getExceptionClass()).isEqualTo(
+                "java.lang.IllegalArgumentException");
     }
 
     @Test
