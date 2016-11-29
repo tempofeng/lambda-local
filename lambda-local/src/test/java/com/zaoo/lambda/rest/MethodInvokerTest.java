@@ -85,7 +85,7 @@ public class MethodInvokerTest {
 
         assertThat(result.headers.size()).isEqualTo(3);
         assertThat(result.headers.get("Access-Control-Allow-Origin")).isEqualTo("*");
-        assertThat(result.headers.get("Access-Control-Allow-Methods")).isEqualTo("GET, POST, HEAD, OPTIONS");
+        assertThat(result.headers.get("Access-Control-Allow-Methods")).isEqualTo("GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE");
         assertThat(result.headers.get("Access-Control-Allow-Headers")).isEqualTo("*");
 
         String response = (String) result.result;
@@ -103,21 +103,25 @@ public class MethodInvokerTest {
 
         assertThat(result.headers.size()).isEqualTo(3);
         assertThat(result.headers.get("Access-Control-Allow-Origin")).isEqualTo("*");
-        assertThat(result.headers.get("Access-Control-Allow-Methods")).isEqualTo("GET, POST, HEAD, OPTIONS");
+        assertThat(result.headers.get("Access-Control-Allow-Methods")).isEqualTo("GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE");
         assertThat(result.headers.get("Access-Control-Allow-Headers")).isEqualTo("*");
 
         String response = (String) result.result;
         assertThat(response).isEqualTo("test1");
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void invoke_required() throws Exception {
         Method method = TestRestFunction5.class.getMethod("hello", String.class, String.class);
         MethodInvoker methodInvoker = new MethodInvoker(TestRestFunction5.class, method, "/testRestPath5");
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setPath("/testRestPath5/");
         req.setQueryStringParameters(ImmutableMap.of("lastName", "feng"));
-        methodInvoker.invoke(new TestRestFunction5(), req);
+
+        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction5(), req);
+
+        assertThat(result.statusCode).isEqualTo(500);
+        assertThat(((MethodInvoker.Error)result.result).getExceptionClass()).isEqualTo("java.lang.IllegalArgumentException");
     }
 
     @Test

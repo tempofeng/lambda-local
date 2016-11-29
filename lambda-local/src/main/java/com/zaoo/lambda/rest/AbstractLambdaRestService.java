@@ -84,55 +84,6 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
                     objectMapper.writeValueAsString(result.result));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
-        } catch (InvocationTargetException e) {
-            log.error(e.getLocalizedMessage(), e);
-            try {
-                Error error;
-                if (e.getCause() != null) {
-                    error = new Error(e.getCause().getLocalizedMessage(), e.getCause());
-                } else {
-                    error = new Error(e.getLocalizedMessage(), e);
-                }
-                return new LambdaProxyResponse(500, Collections.emptyMap(), objectMapper.writeValueAsString(error));
-            } catch (JsonProcessingException jpe) {
-                throw new RuntimeException(jpe);
-            }
-        } catch (Exception e) {
-            log.error(e.getLocalizedMessage(), e);
-            try {
-                return new LambdaProxyResponse(500,
-                        Collections.emptyMap(),
-                        objectMapper.writeValueAsString(new Error(e.getLocalizedMessage(), e)));
-            } catch (JsonProcessingException jpe) {
-                throw new RuntimeException(jpe);
-            }
-        }
-    }
-
-    public static class Error {
-        private String message;
-        @JsonProperty(value = "exception")
-        private String exceptionClass;
-
-        Error(String message, Throwable t) {
-            this.message = message;
-            this.exceptionClass = t.getClass().getName();
-        }
-
-        public String getMessage() {
-            return message;
-        }
-
-        public void setMessage(String message) {
-            this.message = message;
-        }
-
-        public String getExceptionClass() {
-            return exceptionClass;
-        }
-
-        public void setExceptionClass(String exceptionClass) {
-            this.exceptionClass = exceptionClass;
         }
     }
 

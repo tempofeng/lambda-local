@@ -54,7 +54,7 @@ public class AbstractLambdaRestServiceTest {
 
         Map<String, String> headers = lambdaProxyResponse.getHeaders();
         assertThat(headers.get("Access-Control-Allow-Origin")).isEqualTo("*");
-        assertThat(headers.get("Access-Control-Allow-Methods")).isEqualTo("GET, POST, HEAD, OPTIONS");
+        assertThat(headers.get("Access-Control-Allow-Methods")).isEqualTo("GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE");
         assertThat(headers.get("Access-Control-Allow-Headers")).isEqualTo("*");
     }
 
@@ -72,7 +72,7 @@ public class AbstractLambdaRestServiceTest {
         assertThat(resp.getBody()).isEqualTo("{}");
         Map<String, String> headers = resp.getHeaders();
         assertThat(headers.get("Access-Control-Allow-Origin")).isEqualTo("*");
-        assertThat(headers.get("Access-Control-Allow-Methods")).isEqualTo("GET, POST, HEAD, OPTIONS");
+        assertThat(headers.get("Access-Control-Allow-Methods")).isEqualTo("GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE");
         assertThat(headers.get("Access-Control-Allow-Headers")).isEqualTo("*");
     }
 

@@ -1,8 +1,11 @@
 package com.zaoo.lambda.rest;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.zaoo.lambda.LambdaProxyRequest;
+import com.zaoo.lambda.ObjectMappers;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.slf4j.Logger;
@@ -10,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.AntPathMatcher;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.nio.charset.Charset;
@@ -28,6 +30,7 @@ class MethodInvoker {
     private final String methodPath;
     private final HttpMethod httpMethod;
     private final Map<String, String> headers;
+    private final ObjectMapper objectMapper = ObjectMappers.getInstance();
 
     MethodInvoker(Class<?> cls, Method method, String lambdaLocalPath) {
         this.method = method;
@@ -97,7 +100,7 @@ class MethodInvoker {
                 annotation instanceof RestPath;
     }
 
-    Result invoke(Object obj, LambdaProxyRequest request) throws InvocationTargetException {
+    Result invoke(Object obj, LambdaProxyRequest request) {
         Map<String, String> postParams = parsePostParameters(request);
         Map<String, String> pathVariables = pathMatcher.extractUriTemplateVariables(methodPath,
                 getRestMethodPath(request));
@@ -107,8 +110,10 @@ class MethodInvoker {
                     .collect(toList());
             Object result = method.invoke(obj, args.toArray());
             return new Result(200, result, headers);
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+        } catch (Exception e) {
+            log.error(e.getLocalizedMessage(), e);
+            Error error = new Error(e.getLocalizedMessage(), e);
+            return new Result(500, error, headers);
         }
     }
 
@@ -205,6 +210,33 @@ class MethodInvoker {
             this.statusCode = statusCode;
             this.result = result;
             this.headers = headers;
+        }
+    }
+
+    public static class Error {
+        private String message;
+        @JsonProperty(value = "exception")
+        private String exceptionClass;
+
+        Error(String message, Throwable t) {
+            this.message = message;
+            this.exceptionClass = t.getClass().getName();
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+
+        public String getExceptionClass() {
+            return exceptionClass;
+        }
+
+        public void setExceptionClass(String exceptionClass) {
+            this.exceptionClass = exceptionClass;
         }
     }
 }
