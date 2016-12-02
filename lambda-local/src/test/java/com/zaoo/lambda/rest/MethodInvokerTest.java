@@ -5,6 +5,7 @@ import com.zaoo.lambda.LambdaProxyRequest;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -130,6 +131,81 @@ public class MethodInvokerTest {
 
         String response = (String) result.result;
         assertThat(response).isEqualTo("test1");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void invoke_type_json_param1() throws Exception {
+        Method method = TestRestFunction8.class.getMethod("test1", List.class);
+        MethodInvoker methodInvoker = new MethodInvoker(TestRestFunction8.class, method, "/testRestPath8");
+        LambdaProxyRequest req = new LambdaProxyRequest();
+        req.setPath("/testRestPath8/test1");
+        req.setQueryStringParameters(ImmutableMap.of("test", "[\"test1\",\"test2\"]"));
+        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction8(), req);
+        assertThat(result.statusCode).isEqualTo(200);
+
+        List<String> response = (List<String>) result.result;
+        assertThat(response).contains("test1", "test2");
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void invoke_type_json_param2() throws Exception {
+        Method method = TestRestFunction8.class.getMethod("test2", Map.class);
+        MethodInvoker methodInvoker = new MethodInvoker(TestRestFunction8.class, method, "/testRestPath8");
+        LambdaProxyRequest req = new LambdaProxyRequest();
+        req.setPath("/testRestPath8/test2");
+        req.setQueryStringParameters(ImmutableMap.of("test", "{\"key1\":\"value1\",\"key2\":\"value2\"}"));
+        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction8(), req);
+        assertThat(result.statusCode).isEqualTo(200);
+
+        Map<String, String> response = (Map<String, String>) result.result;
+        assertThat(response).containsAllEntriesOf(ImmutableMap.of("key1", "value1", "key2", "value2"));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void invoke_type_json_param3() throws Exception {
+        Method method = TestRestFunction8.class.getMethod("test3", TestRestFunction8.TestClass.class);
+        MethodInvoker methodInvoker = new MethodInvoker(TestRestFunction8.class, method, "/testRestPath8");
+        LambdaProxyRequest req = new LambdaProxyRequest();
+        req.setPath("/testRestPath8/test3");
+        req.setQueryStringParameters(ImmutableMap.of("test", "{\"str\":\"test1\"}"));
+        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction8(), req);
+        assertThat(result.statusCode).isEqualTo(200);
+
+        TestRestFunction8.TestClass response = (TestRestFunction8.TestClass) result.result;
+        assertThat(response).isEqualTo(new TestRestFunction8.TestClass("test1"));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void invoke_type_json_param4() throws Exception {
+        Method method = TestRestFunction8.class.getMethod("test4", List.class);
+        MethodInvoker methodInvoker = new MethodInvoker(TestRestFunction8.class, method, "/testRestPath8");
+        LambdaProxyRequest req = new LambdaProxyRequest();
+        req.setPath("/testRestPath8/test4");
+        req.setQueryStringParameters(ImmutableMap.of("test", "[{\"str\":\"test1\"}]"));
+        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction8(), req);
+        assertThat(result.statusCode).isEqualTo(200);
+
+        List<TestRestFunction8.TestClass> response = (List<TestRestFunction8.TestClass>) result.result;
+        assertThat(response).contains(new TestRestFunction8.TestClass("test1"));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    public void invoke_type_json_param5() throws Exception {
+        Method method = TestRestFunction8.class.getMethod("test5", Map.class);
+        MethodInvoker methodInvoker = new MethodInvoker(TestRestFunction8.class, method, "/testRestPath8");
+        LambdaProxyRequest req = new LambdaProxyRequest();
+        req.setPath("/testRestPath8/test5");
+        req.setQueryStringParameters(ImmutableMap.of("test", "{\"key1\":{\"str\":\"test1\"}}"));
+        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction8(), req);
+        assertThat(result.statusCode).isEqualTo(200);
+
+        Map<String, TestRestFunction8.TestClass> response = (Map<String, TestRestFunction8.TestClass>) result.result;
+        assertThat(response).containsAllEntriesOf(ImmutableMap.of("key1", new TestRestFunction8.TestClass("test1")));
     }
 
     @Test

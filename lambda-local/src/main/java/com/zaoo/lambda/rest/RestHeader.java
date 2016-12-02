@@ -12,5 +12,5 @@ public @interface RestHeader {
 
     boolean required() default true;
 
-    Class<? extends RestParamDeserializer<?>> deserializer() default DefaultRestParamDeserializer.class;
+    Class<? extends RestParamDeserializer<?>> deserializer() default JsonRestParamDeserializer.class;
 }

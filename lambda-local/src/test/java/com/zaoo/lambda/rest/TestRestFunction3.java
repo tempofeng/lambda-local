@@ -1,5 +1,6 @@
 package com.zaoo.lambda.rest;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.zaoo.lambda.LambdaLocal;
 
 @LambdaLocal("/testRestPath3")
@@ -48,7 +49,7 @@ public class TestRestFunction3 {
 
     public static class CustomRestParamDeserializer implements RestParamDeserializer<CustomClass> {
         @Override
-        public CustomClass deserialize(String str, Class<?> cls) {
+        public CustomClass deserialize(String str, JavaType javaType) {
             String[] split = str.split(",");
             return new CustomClass(split[0], split[1]);
         }

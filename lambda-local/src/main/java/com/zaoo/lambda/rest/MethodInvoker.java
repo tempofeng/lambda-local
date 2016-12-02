@@ -1,9 +1,12 @@
 package com.zaoo.lambda.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.zaoo.lambda.LambdaProxyRequest;
+import com.zaoo.lambda.ObjectMappers;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.slf4j.Logger;
@@ -14,6 +17,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -50,23 +54,26 @@ class MethodInvoker {
         methodPath = restMethod.path();
         httpMethod = restMethod.httpMethod();
 
+        ObjectMapper objectMapper = ObjectMappers.getInstance();
         Parameter[] parameters = method.getParameters();
+        Type[] parameterTypes = method.getGenericParameterTypes();
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
+            JavaType javaType = objectMapper.getTypeFactory().constructType(parameterTypes[i]);
             Annotation[] annotations = parameterAnnotations[i];
             Optional<Annotation> opt = Arrays.stream(annotations).filter(this::isRestAnnotation).findFirst();
             if (opt.isPresent()) {
                 Annotation annotation = opt.get();
                 RestParamDeserializer restParamDeserializer = createDeserializer(annotation);
                 paramRetrievers.add(new ParamRetriever(ParamRetriever.ParamRetrieverType.ANNOTATION,
-                        parameter,
+                        javaType,
                         annotation,
                         restParamDeserializer
                 ));
             } else if (parameter.getType().isAssignableFrom(LambdaProxyRequest.class)) {
                 paramRetrievers.add(new ParamRetriever(ParamRetriever.ParamRetrieverType.LAMBDA_PROXY_REQUEST,
-                        parameter,
+                        javaType,
                         new ErrorAnnotation(),
                         new ErrorRestParamDeserializer()
                 ));
@@ -210,8 +217,8 @@ class MethodInvoker {
 
     private static class ErrorRestParamDeserializer implements RestParamDeserializer<Object> {
         @Override
-        public Object deserialize(String str, Class<?> cls) {
-            throw new IllegalArgumentException("Unable to get RestParamDeserializer of this type:" + cls);
+        public Object deserialize(String str, JavaType javaType) {
+            throw new IllegalArgumentException("Unable to get RestParamDeserializer of this type:" + javaType);
         }
     }
 

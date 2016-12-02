@@ -1,5 +1,6 @@
 package com.zaoo.lambda.rest;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaoo.lambda.LambdaProxyRequest;
 import com.zaoo.lambda.ObjectMappers;
@@ -8,23 +9,22 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Parameter;
 import java.util.Map;
 
 class ParamRetriever {
     private static final Logger log = LoggerFactory.getLogger(ParamRetriever.class);
     private final ParamRetrieverType type;
-    private final Parameter parameter;
+    private final JavaType parameterJavaType;
     private final Annotation annotation;
     private final RestParamDeserializer<?> restParamDeserializer;
     private final ObjectMapper objectMapper = ObjectMappers.getInstance();
 
     ParamRetriever(ParamRetrieverType type,
-                   Parameter parameter,
+                   JavaType parameterJavaType,
                    Annotation annotation,
                    RestParamDeserializer<?> restParamDeserializer) {
         this.type = type;
-        this.parameter = parameter;
+        this.parameterJavaType = parameterJavaType;
         this.annotation = annotation;
         this.restParamDeserializer = restParamDeserializer;
     }
@@ -40,9 +40,9 @@ class ParamRetriever {
         }
     }
 
-    Object retrieveByAnnotation(LambdaProxyRequest request,
-                                Map<String, String> postParams,
-                                Map<String, String> pathVariables) {
+    private Object retrieveByAnnotation(LambdaProxyRequest request,
+                                        Map<String, String> postParams,
+                                        Map<String, String> pathVariables) {
         log.debug("retrieveByAnnotation:post={},path={}", postParams, pathVariables);
 
         if (annotation instanceof RestParam) {
@@ -62,7 +62,7 @@ class ParamRetriever {
                     return null;
                 }
             }
-            return restParamDeserializer.deserialize(valueStr, parameter.getType());
+            return restParamDeserializer.deserialize(valueStr, parameterJavaType);
         }
 
         if (annotation instanceof RestPath) {
@@ -77,7 +77,7 @@ class ParamRetriever {
                     return null;
                 }
             }
-            return restParamDeserializer.deserialize(valueStr, parameter.getType());
+            return restParamDeserializer.deserialize(valueStr, parameterJavaType);
         }
 
         if (annotation instanceof RestHeader) {
@@ -92,7 +92,7 @@ class ParamRetriever {
                     return null;
                 }
             }
-            return restParamDeserializer.deserialize(valueStr, parameter.getType());
+            return restParamDeserializer.deserialize(valueStr, parameterJavaType);
         }
 
         if (annotation instanceof RestBody) {
@@ -105,7 +105,7 @@ class ParamRetriever {
             }
 
             try {
-                return objectMapper.readValue(request.getBody(), parameter.getType());
+                return objectMapper.readValue(request.getBody(), parameterJavaType);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
