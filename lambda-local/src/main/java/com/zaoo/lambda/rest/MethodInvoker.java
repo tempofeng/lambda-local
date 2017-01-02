@@ -105,7 +105,7 @@ class MethodInvoker {
                 annotation instanceof RestPath;
     }
 
-    Result invoke(Object obj, LambdaProxyRequest request) {
+    RestResponseEntity invoke(Object obj, LambdaProxyRequest request) {
         Map<String, String> postParams = parsePostParameters(request);
         Map<String, String> pathVariables = pathMatcher.extractUriTemplateVariables(methodPath,
                 getRestMethodPath(request));
@@ -114,7 +114,11 @@ class MethodInvoker {
                     .map(paramRetriever -> paramRetriever.retrieve(request, postParams, pathVariables))
                     .collect(toList());
             Object result = method.invoke(obj, args.toArray());
-            return new Result(200, result, getCrossOriginHeaders(request));
+
+            if (result instanceof RestResponseEntity) {
+                return (RestResponseEntity) result;
+            }
+            return new RestResponseEntity(200, result, getCrossOriginHeaders(request));
         } catch (InvocationTargetException e) {
             log.error(e.getLocalizedMessage(), e);
             Error error;
@@ -123,11 +127,11 @@ class MethodInvoker {
             } else {
                 error = new Error(e.getLocalizedMessage(), e);
             }
-            return new Result(500, error, getCrossOriginHeaders(request));
+            return new RestResponseEntity(500, error, getCrossOriginHeaders(request));
         } catch (Exception e) {
             log.error(e.getLocalizedMessage(), e);
             Error error = new Error(e.getLocalizedMessage(), e);
-            return new Result(500, error, getCrossOriginHeaders(request));
+            return new RestResponseEntity(500, error, getCrossOriginHeaders(request));
         }
     }
 
@@ -145,8 +149,8 @@ class MethodInvoker {
         return headers;
     }
 
-    Result invokeCorsPreflight(LambdaProxyRequest request) {
-        return new Result(200, Collections.emptyMap(), getCrossOriginHeaders(request));
+    RestResponseEntity invokeCorsPreflight(LambdaProxyRequest request) {
+        return new RestResponseEntity(200, Collections.emptyMap(), getCrossOriginHeaders(request));
     }
 
     Map<String, String> parsePostParameters(LambdaProxyRequest request) {
@@ -226,18 +230,6 @@ class MethodInvoker {
         @Override
         public Class<? extends Annotation> annotationType() {
             throw new IllegalArgumentException("Unable to get annotation type");
-        }
-    }
-
-    static class Result {
-        public final int statusCode;
-        public final Object result;
-        public final Map<String, String> headers;
-
-        public Result(int statusCode, Object result, Map<String, String> headers) {
-            this.statusCode = statusCode;
-            this.result = result;
-            this.headers = headers;
         }
     }
 

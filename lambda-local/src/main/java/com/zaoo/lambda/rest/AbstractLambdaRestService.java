@@ -1,7 +1,6 @@
 package com.zaoo.lambda.rest;
 
 import com.amazonaws.services.lambda.runtime.Context;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaoo.lambda.*;
@@ -9,8 +8,6 @@ import org.reflections.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -64,10 +61,10 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
 
     private LambdaProxyResponse invokeCorsPreflightMethod(MethodInvoker methodInvoker, LambdaProxyRequest input) {
         try {
-            MethodInvoker.Result result = methodInvoker.invokeCorsPreflight(input);
-            return new LambdaProxyResponse(result.statusCode,
-                    result.headers,
-                    objectMapper.writeValueAsString(result.result));
+            RestResponseEntity responseEntity = methodInvoker.invokeCorsPreflight(input);
+            return new LambdaProxyResponse(responseEntity.getStatusCode(),
+                    responseEntity.getHeaders(),
+                    objectMapper.writeValueAsString(responseEntity.getResult()));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -78,10 +75,10 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
             log.debug("invokeMethod:methodPath={},httpMethod={}",
                     methodInvoker.getMethodPath(),
                     methodInvoker.getHttpMethod());
-            MethodInvoker.Result result = methodInvoker.invoke(this, input);
-            return new LambdaProxyResponse(result.statusCode,
-                    result.headers,
-                    objectMapper.writeValueAsString(result.result));
+            RestResponseEntity responseEntity = methodInvoker.invoke(this, input);
+            return new LambdaProxyResponse(responseEntity.getStatusCode(),
+                    responseEntity.getHeaders(),
+                    objectMapper.writeValueAsString(responseEntity.getResult()));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

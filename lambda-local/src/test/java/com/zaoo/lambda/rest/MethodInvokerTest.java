@@ -39,10 +39,10 @@ public class MethodInvokerTest {
         req.setQueryStringParameters(ImmutableMap.of("lastName", "feng"));
         req.setBody("firstName=tempo");
         req.setPath("/testRestPath1");
-        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction1(), req);
-        assertThat(result.statusCode).isEqualTo(200);
-        assertThat(result.headers).isEmpty();
-        TestRestFunction1.Response func = (TestRestFunction1.Response) result.result;
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction1(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
+        assertThat(result.getHeaders()).isEmpty();
+        TestRestFunction1.Response func = (TestRestFunction1.Response) result.getResult();
         assertThat(func.firstName).isEqualTo("tempo");
         assertThat(func.lastName).isEqualTo("feng");
         assertThat(func.userToken).isEqualTo("testUserToken");
@@ -54,10 +54,10 @@ public class MethodInvokerTest {
         MethodInvoker methodInvoker = new MethodInvoker(TestRestFunction4.class, method, "/testRestPath4");
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setPath("/testRestPath4/test/tempo");
-        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction4(), req);
-        assertThat(result.statusCode).isEqualTo(200);
-        assertThat(result.headers).isEmpty();
-        String response = (String) result.result;
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction4(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
+        assertThat(result.getHeaders()).isEmpty();
+        String response = (String) result.getResult();
         assertThat(response).isEqualTo("tempo");
     }
 
@@ -68,10 +68,10 @@ public class MethodInvokerTest {
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setPath("/testRestPath5/");
         req.setQueryStringParameters(ImmutableMap.of("firstName", "tempo"));
-        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction5(), req);
-        assertThat(result.statusCode).isEqualTo(200);
-        assertThat(result.headers).isEmpty();
-        String response = (String) result.result;
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction5(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
+        assertThat(result.getHeaders()).isEmpty();
+        String response = (String) result.getResult();
         assertThat(response).isEqualTo("tempo,null");
     }
 
@@ -81,16 +81,16 @@ public class MethodInvokerTest {
         MethodInvoker methodInvoker = new MethodInvoker(TestRestFunction6.class, method, "/testRestPath6");
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setPath("/testRestPath6/");
-        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction6(), req);
-        assertThat(result.statusCode).isEqualTo(200);
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction6(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
 
-        assertThat(result.headers.size()).isEqualTo(3);
-        assertThat(result.headers.get("Access-Control-Allow-Origin")).isEqualTo("*");
-        assertThat(result.headers.get("Access-Control-Allow-Methods")).isEqualTo(
+        assertThat(result.getHeaders().size()).isEqualTo(3);
+        assertThat(result.getHeaders().get("Access-Control-Allow-Origin")).isEqualTo("*");
+        assertThat(result.getHeaders().get("Access-Control-Allow-Methods")).isEqualTo(
                 "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE");
-        assertThat(result.headers.get("Access-Control-Allow-Headers")).isEqualTo("*");
+        assertThat(result.getHeaders().get("Access-Control-Allow-Headers")).isEqualTo("*");
 
-        String response = (String) result.result;
+        String response = (String) result.getResult();
         assertThat(response).isEqualTo("test1");
     }
 
@@ -101,16 +101,16 @@ public class MethodInvokerTest {
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setPath("/testRestPath6/");
         req.setHeaders(ImmutableMap.of("Access-Control-Request-Headers", "Content-Type"));
-        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction6(), req);
-        assertThat(result.statusCode).isEqualTo(200);
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction6(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
 
-        assertThat(result.headers.size()).isEqualTo(3);
-        assertThat(result.headers.get("Access-Control-Allow-Origin")).isEqualTo("*");
-        assertThat(result.headers.get("Access-Control-Allow-Methods")).isEqualTo(
+        assertThat(result.getHeaders().size()).isEqualTo(3);
+        assertThat(result.getHeaders().get("Access-Control-Allow-Origin")).isEqualTo("*");
+        assertThat(result.getHeaders().get("Access-Control-Allow-Methods")).isEqualTo(
                 "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE");
-        assertThat(result.headers.get("Access-Control-Allow-Headers")).isEqualTo("Content-Type");
+        assertThat(result.getHeaders().get("Access-Control-Allow-Headers")).isEqualTo("Content-Type");
 
-        String response = (String) result.result;
+        String response = (String) result.getResult();
         assertThat(response).isEqualTo("test1");
     }
 
@@ -120,17 +120,30 @@ public class MethodInvokerTest {
         MethodInvoker methodInvoker = new MethodInvoker(TestRestFunction7.class, method, "/testRestPath7");
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setPath("/testRestPath7/");
-        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction7(), req);
-        assertThat(result.statusCode).isEqualTo(200);
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction7(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
 
-        assertThat(result.headers.size()).isEqualTo(3);
-        assertThat(result.headers.get("Access-Control-Allow-Origin")).isEqualTo("*");
-        assertThat(result.headers.get("Access-Control-Allow-Methods")).isEqualTo(
+        assertThat(result.getHeaders().size()).isEqualTo(3);
+        assertThat(result.getHeaders().get("Access-Control-Allow-Origin")).isEqualTo("*");
+        assertThat(result.getHeaders().get("Access-Control-Allow-Methods")).isEqualTo(
                 "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE");
-        assertThat(result.headers.get("Access-Control-Allow-Headers")).isEqualTo("*");
+        assertThat(result.getHeaders().get("Access-Control-Allow-Headers")).isEqualTo("*");
 
-        String response = (String) result.result;
+        String response = (String) result.getResult();
         assertThat(response).isEqualTo("test1");
+    }
+
+    @Test
+    public void invoke_restResponseEntity() throws Exception {
+        Method method = TestRestFunction9.class.getMethod("test1");
+        MethodInvoker methodInvoker = new MethodInvoker(TestRestFunction9.class, method, "/testRestPath9");
+        LambdaProxyRequest req = new LambdaProxyRequest();
+        req.setPath("/testRestPath9/");
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction9(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
+        assertThat(result.getHeaders().isEmpty()).isTrue();
+        String response = (String) result.getResult();
+        assertThat(response).isEqualTo("Hello");
     }
 
     @SuppressWarnings("unchecked")
@@ -141,10 +154,10 @@ public class MethodInvokerTest {
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setPath("/testRestPath8/test1");
         req.setQueryStringParameters(ImmutableMap.of("test", "[\"test1\",\"test2\"]"));
-        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction8(), req);
-        assertThat(result.statusCode).isEqualTo(200);
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction8(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
 
-        List<String> response = (List<String>) result.result;
+        List<String> response = (List<String>) result.getResult();
         assertThat(response).contains("test1", "test2");
     }
 
@@ -156,10 +169,10 @@ public class MethodInvokerTest {
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setPath("/testRestPath8/test2");
         req.setQueryStringParameters(ImmutableMap.of("test", "{\"key1\":\"value1\",\"key2\":\"value2\"}"));
-        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction8(), req);
-        assertThat(result.statusCode).isEqualTo(200);
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction8(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
 
-        Map<String, String> response = (Map<String, String>) result.result;
+        Map<String, String> response = (Map<String, String>) result.getResult();
         assertThat(response).containsAllEntriesOf(ImmutableMap.of("key1", "value1", "key2", "value2"));
     }
 
@@ -171,10 +184,10 @@ public class MethodInvokerTest {
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setPath("/testRestPath8/test3");
         req.setQueryStringParameters(ImmutableMap.of("test", "{\"str\":\"test1\"}"));
-        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction8(), req);
-        assertThat(result.statusCode).isEqualTo(200);
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction8(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
 
-        TestRestFunction8.TestClass response = (TestRestFunction8.TestClass) result.result;
+        TestRestFunction8.TestClass response = (TestRestFunction8.TestClass) result.getResult();
         assertThat(response).isEqualTo(new TestRestFunction8.TestClass("test1"));
     }
 
@@ -186,10 +199,10 @@ public class MethodInvokerTest {
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setPath("/testRestPath8/test4");
         req.setQueryStringParameters(ImmutableMap.of("test", "[{\"str\":\"test1\"}]"));
-        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction8(), req);
-        assertThat(result.statusCode).isEqualTo(200);
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction8(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
 
-        List<TestRestFunction8.TestClass> response = (List<TestRestFunction8.TestClass>) result.result;
+        List<TestRestFunction8.TestClass> response = (List<TestRestFunction8.TestClass>) result.getResult();
         assertThat(response).contains(new TestRestFunction8.TestClass("test1"));
     }
 
@@ -201,10 +214,10 @@ public class MethodInvokerTest {
         LambdaProxyRequest req = new LambdaProxyRequest();
         req.setPath("/testRestPath8/test5");
         req.setQueryStringParameters(ImmutableMap.of("test", "{\"key1\":{\"str\":\"test1\"}}"));
-        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction8(), req);
-        assertThat(result.statusCode).isEqualTo(200);
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction8(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
 
-        Map<String, TestRestFunction8.TestClass> response = (Map<String, TestRestFunction8.TestClass>) result.result;
+        Map<String, TestRestFunction8.TestClass> response = (Map<String, TestRestFunction8.TestClass>) result.getResult();
         assertThat(response).containsAllEntriesOf(ImmutableMap.of("key1", new TestRestFunction8.TestClass("test1")));
     }
 
@@ -216,10 +229,10 @@ public class MethodInvokerTest {
         req.setPath("/testRestPath5/");
         req.setQueryStringParameters(ImmutableMap.of("lastName", "feng"));
 
-        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction5(), req);
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction5(), req);
 
-        assertThat(result.statusCode).isEqualTo(500);
-        assertThat(((MethodInvoker.Error) result.result).getExceptionClass()).isEqualTo(
+        assertThat(result.getStatusCode()).isEqualTo(500);
+        assertThat(((MethodInvoker.Error) result.getResult()).getExceptionClass()).isEqualTo(
                 "java.lang.IllegalArgumentException");
     }
 
@@ -234,10 +247,10 @@ public class MethodInvokerTest {
         req.setQueryStringParameters(ImmutableMap.of("firstName", "tempo", "lastName", "feng"));
         req.setBody("{\"addr\":\"台北市\",\"mobile\":\"12345\"}");
         req.setPath("/testRestPath2");
-        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction2(), req);
-        assertThat(result.statusCode).isEqualTo(200);
-        assertThat(result.headers).isEmpty();
-        TestRestFunction2.Response func = (TestRestFunction2.Response) result.result;
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction2(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
+        assertThat(result.getHeaders()).isEmpty();
+        TestRestFunction2.Response func = (TestRestFunction2.Response) result.getResult();
         assertThat(func.firstName).isEqualTo("tempo");
         assertThat(func.lastName).isEqualTo("feng");
         assertThat(func.userToken).isEqualTo("testUserToken");
@@ -271,10 +284,10 @@ public class MethodInvokerTest {
         req.setQueryStringParameters(map);
         req.setBody("{\"addr\":\"台北市\",\"mobile\":\"12345\"}");
         req.setPath("/testRestPath3");
-        MethodInvoker.Result result = methodInvoker.invoke(new TestRestFunction3(), req);
-        assertThat(result.statusCode).isEqualTo(200);
-        assertThat(result.headers).isEmpty();
-        TestRestFunction3.Response func = (TestRestFunction3.Response) result.result;
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction3(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
+        assertThat(result.getHeaders()).isEmpty();
+        TestRestFunction3.Response func = (TestRestFunction3.Response) result.getResult();
         assertThat(func.key1).isEqualTo("value1");
         assertThat(func.key2).isEqualTo(2);
         assertThat(func.key3).isEqualTo(3);
