@@ -28,7 +28,7 @@ class MethodInvoker {
     private final AntPathMatcher pathMatcher = new AntPathMatcher();
     private final String methodPath;
     private final HttpMethod httpMethod;
-    private final Map<String, String> headers;
+    private final Map<String, String> headers = new HashMap<>();
 
     public MethodInvoker(Class<?> cls, Method method, String lambdaLocalPath) {
         this.method = method;
@@ -36,13 +36,21 @@ class MethodInvoker {
 
         CrossOrigin crossOrigin = method.getAnnotation(CrossOrigin.class);
         if (crossOrigin != null) {
-            headers = createCrossOriginHeaders(crossOrigin);
+            headers.putAll(createCrossOriginHeaders(crossOrigin));
         } else {
             CrossOrigin classCrossOrigin = cls.getAnnotation(CrossOrigin.class);
             if (classCrossOrigin != null) {
-                headers = createCrossOriginHeaders(classCrossOrigin);
-            } else {
-                headers = Collections.emptyMap();
+                headers.putAll(createCrossOriginHeaders(classCrossOrigin));
+            }
+        }
+
+        CacheControl cacheControl = method.getAnnotation(CacheControl.class);
+        if (cacheControl != null) {
+            headers.put("Cache-Control", cacheControl.value());
+        } else {
+            CacheControl classCacheControl = cls.getAnnotation(CacheControl.class);
+            if (classCacheControl != null) {
+                headers.put("Cache-Control", classCacheControl.value());
             }
         }
 

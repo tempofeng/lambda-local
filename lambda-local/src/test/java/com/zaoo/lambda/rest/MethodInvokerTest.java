@@ -180,6 +180,22 @@ public class MethodInvokerTest {
         assertThat(response).isEqualTo("Hello");
     }
 
+    @Test
+    public void invoke_cacheControl() throws Exception {
+        Method method = TestRestFunction12.class.getMethod("test1");
+        MethodInvoker methodInvoker = new MethodInvoker(TestRestFunction12.class, method, "/testRestPath12");
+        LambdaProxyRequest req = new LambdaProxyRequest();
+        req.setPath("/testRestPath12/");
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction12(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
+        assertThat(result.getHeaders().size()).isEqualTo(2);
+        assertThat(result.getHeaders().get("Content-Type")).isEqualTo("application/json");
+        assertThat(result.getHeaders().get("Cache-Control")).isEqualTo("no-store");
+
+        String response = (String) result.getResult();
+        assertThat(response).isEqualTo("Hello");
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     public void invoke_type_json_param1() throws Exception {
