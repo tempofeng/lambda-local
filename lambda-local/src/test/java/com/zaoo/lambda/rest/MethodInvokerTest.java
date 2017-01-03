@@ -12,19 +12,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class MethodInvokerTest {
     @Test
-    public void parsePostParameters() throws Exception {
-        Method method = TestRestFunction1.class.getMethod("hello", String.class, String.class, String.class);
-        MethodInvoker methodInvoker = new MethodInvoker(TestRestFunction1.class, method, "/testRestPath1");
-        LambdaProxyRequest req = new LambdaProxyRequest();
-        req.setHeaders(ImmutableMap.of("Content-Type", "application/x-www-form-urlencoded"));
-        req.setBody("key1=value1&key2=value2");
-        Map<String, String> map = methodInvoker.parsePostParameters(req);
-        assertThat(map.size()).isEqualTo(2);
-        assertThat(map.get("key1")).isEqualTo("value1");
-        assertThat(map.get("key2")).isEqualTo("value2");
-    }
-
-    @Test
     public void invoke() throws Exception {
         Method method = TestRestFunction1.class.getMethod("hello",
                 String.class,
@@ -158,6 +145,20 @@ public class MethodInvokerTest {
         assertThat(result.getHeaders().isEmpty()).isTrue();
         String response = (String) result.getResult();
         assertThat(response).isEqualTo("/testRestPath10/");
+    }
+
+    @Test
+    public void invoke_cookie() throws Exception {
+        Method method = TestRestFunction11.class.getMethod("test1", String.class, String.class);
+        MethodInvoker methodInvoker = new MethodInvoker(TestRestFunction11.class, method, "/testRestPath11");
+        LambdaProxyRequest req = new LambdaProxyRequest();
+        req.setPath("/testRestPath11/");
+        req.setHeaders(ImmutableMap.of("Cookie", "test1=Hello;"));
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction11(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
+        assertThat(result.getHeaders().isEmpty()).isTrue();
+        String response = (String) result.getResult();
+        assertThat(response).isEqualTo("Hello");
     }
 
     @SuppressWarnings("unchecked")

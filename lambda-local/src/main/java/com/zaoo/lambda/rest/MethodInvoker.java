@@ -7,8 +7,6 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.zaoo.lambda.LambdaProxyRequest;
 import com.zaoo.lambda.ObjectMappers;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.utils.URLEncodedUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.AntPathMatcher;
@@ -18,9 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
-import java.nio.charset.Charset;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 
@@ -101,17 +97,16 @@ class MethodInvoker {
     private boolean isRestAnnotation(Annotation annotation) {
         return annotation instanceof RestParam ||
                 annotation instanceof RestHeader ||
+                annotation instanceof RestCookie ||
                 annotation instanceof RestBody ||
                 annotation instanceof RestPath;
     }
 
     RestResponseEntity invoke(Object obj, LambdaProxyRequest request) {
-        Map<String, String> postParams = parsePostParameters(request);
-        Map<String, String> pathVariables = pathMatcher.extractUriTemplateVariables(methodPath,
-                getRestMethodPath(request));
+        MethodInvocationContext context = new MethodInvocationContext(lambdaLocalPath, methodPath, request);
         try {
             List<Object> args = paramRetrievers.stream()
-                    .map(paramRetriever -> paramRetriever.retrieve(request, postParams, pathVariables))
+                    .map(paramRetriever -> paramRetriever.retrieve(request, context))
                     .collect(toList());
             Object result = method.invoke(obj, args.toArray());
 
@@ -153,22 +148,6 @@ class MethodInvoker {
         return new RestResponseEntity(200, Collections.emptyMap(), getCrossOriginHeaders(request));
     }
 
-    Map<String, String> parsePostParameters(LambdaProxyRequest request) {
-        String contentType = request.getHeaders().get("Content-Type");
-        if (!"application/x-www-form-urlencoded".equals(contentType)) {
-            return Collections.emptyMap();
-        }
-
-        String body = request.getBody();
-        if (Strings.isNullOrEmpty(body)) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, String> postParams = URLEncodedUtils.parse(body, Charset.forName("UTF-8")).stream()
-                .collect(Collectors.toMap(NameValuePair::getName, NameValuePair::getValue));
-        return postParams;
-    }
-
     private RestParamDeserializer createDeserializer(Annotation annotation) {
         if (annotation instanceof RestParam) {
             RestParam restParam = (RestParam) annotation;
@@ -183,6 +162,11 @@ class MethodInvoker {
         if (annotation instanceof RestHeader) {
             RestHeader restHeader = (RestHeader) annotation;
             return createDeserializer(restHeader.deserializer());
+        }
+
+        if (annotation instanceof RestCookie) {
+            RestCookie restCookie = (RestCookie) annotation;
+            return createDeserializer(restCookie.deserializer());
         }
 
         return new ErrorRestParamDeserializer();
