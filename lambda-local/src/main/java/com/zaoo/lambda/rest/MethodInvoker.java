@@ -30,7 +30,7 @@ class MethodInvoker {
     private final HttpMethod httpMethod;
     private final Map<String, String> headers;
 
-    MethodInvoker(Class<?> cls, Method method, String lambdaLocalPath) {
+    public MethodInvoker(Class<?> cls, Method method, String lambdaLocalPath) {
         this.method = method;
         this.lambdaLocalPath = lambdaLocalPath;
 
@@ -113,7 +113,11 @@ class MethodInvoker {
             if (result instanceof RestResponseEntity) {
                 return (RestResponseEntity) result;
             }
-            return new RestResponseEntity(200, result, getCrossOriginHeaders(request));
+
+            return new RestResponseEntity.Builder()
+                    .withResult(result)
+                    .addHeaders(getCrossOriginHeaders(request))
+                    .build();
         } catch (InvocationTargetException e) {
             log.error(e.getLocalizedMessage(), e);
             Error error;
@@ -122,11 +126,20 @@ class MethodInvoker {
             } else {
                 error = new Error(e.getLocalizedMessage(), e);
             }
-            return new RestResponseEntity(500, error, getCrossOriginHeaders(request));
+
+            return new RestResponseEntity.Builder()
+                    .withStatusCode(500)
+                    .withResult(error)
+                    .addHeaders(getCrossOriginHeaders(request))
+                    .build();
         } catch (Exception e) {
             log.error(e.getLocalizedMessage(), e);
             Error error = new Error(e.getLocalizedMessage(), e);
-            return new RestResponseEntity(500, error, getCrossOriginHeaders(request));
+            return new RestResponseEntity.Builder()
+                    .withStatusCode(500)
+                    .withResult(error)
+                    .addHeaders(getCrossOriginHeaders(request))
+                    .build();
         }
     }
 
@@ -145,7 +158,7 @@ class MethodInvoker {
     }
 
     RestResponseEntity invokeCorsPreflight(LambdaProxyRequest request) {
-        return new RestResponseEntity(200, Collections.emptyMap(), getCrossOriginHeaders(request));
+        return new RestResponseEntity(200, Collections.emptyMap(), null, getCrossOriginHeaders(request));
     }
 
     private RestParamDeserializer createDeserializer(Annotation annotation) {

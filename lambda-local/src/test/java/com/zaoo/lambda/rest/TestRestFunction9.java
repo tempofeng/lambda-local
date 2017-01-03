@@ -8,6 +8,10 @@ import java.util.Collections;
 public class TestRestFunction9 {
     @RestMethod(httpMethod = HttpMethod.GET, path = "/")
     public RestResponseEntity test1() {
-        return new RestResponseEntity(200, "Hello", Collections.emptyMap());
+        return new RestResponseEntity.Builder()
+                .withResult("Hello")
+                .addHeader("testName", "testValue")
+                .addCookie("testCookieName", "testCookieValue")
+                .build();
     }
 }

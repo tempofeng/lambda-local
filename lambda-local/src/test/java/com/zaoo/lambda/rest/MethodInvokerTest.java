@@ -28,7 +28,9 @@ public class MethodInvokerTest {
         req.setPath("/testRestPath1");
         RestResponseEntity result = methodInvoker.invoke(new TestRestFunction1(), req);
         assertThat(result.getStatusCode()).isEqualTo(200);
-        assertThat(result.getHeaders()).isEmpty();
+        assertThat(result.getHeaders().size()).isEqualTo(1);
+        assertThat(result.getHeaders().get("Content-Type")).isEqualTo("application/json");
+
         TestRestFunction1.Response func = (TestRestFunction1.Response) result.getResult();
         assertThat(func.firstName).isEqualTo("tempo");
         assertThat(func.lastName).isEqualTo("feng");
@@ -43,7 +45,9 @@ public class MethodInvokerTest {
         req.setPath("/testRestPath4/test/tempo");
         RestResponseEntity result = methodInvoker.invoke(new TestRestFunction4(), req);
         assertThat(result.getStatusCode()).isEqualTo(200);
-        assertThat(result.getHeaders()).isEmpty();
+        assertThat(result.getHeaders().size()).isEqualTo(1);
+        assertThat(result.getHeaders().get("Content-Type")).isEqualTo("application/json");
+
         String response = (String) result.getResult();
         assertThat(response).isEqualTo("tempo");
     }
@@ -57,7 +61,9 @@ public class MethodInvokerTest {
         req.setQueryStringParameters(ImmutableMap.of("firstName", "tempo"));
         RestResponseEntity result = methodInvoker.invoke(new TestRestFunction5(), req);
         assertThat(result.getStatusCode()).isEqualTo(200);
-        assertThat(result.getHeaders()).isEmpty();
+        assertThat(result.getHeaders().size()).isEqualTo(1);
+        assertThat(result.getHeaders().get("Content-Type")).isEqualTo("application/json");
+
         String response = (String) result.getResult();
         assertThat(response).isEqualTo("tempo,null");
     }
@@ -71,11 +77,12 @@ public class MethodInvokerTest {
         RestResponseEntity result = methodInvoker.invoke(new TestRestFunction6(), req);
         assertThat(result.getStatusCode()).isEqualTo(200);
 
-        assertThat(result.getHeaders().size()).isEqualTo(3);
+        assertThat(result.getHeaders().size()).isEqualTo(4);
         assertThat(result.getHeaders().get("Access-Control-Allow-Origin")).isEqualTo("*");
         assertThat(result.getHeaders().get("Access-Control-Allow-Methods")).isEqualTo(
                 "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE");
         assertThat(result.getHeaders().get("Access-Control-Allow-Headers")).isEqualTo("*");
+        assertThat(result.getHeaders().get("Content-Type")).isEqualTo("application/json");
 
         String response = (String) result.getResult();
         assertThat(response).isEqualTo("test1");
@@ -91,11 +98,12 @@ public class MethodInvokerTest {
         RestResponseEntity result = methodInvoker.invoke(new TestRestFunction6(), req);
         assertThat(result.getStatusCode()).isEqualTo(200);
 
-        assertThat(result.getHeaders().size()).isEqualTo(3);
+        assertThat(result.getHeaders().size()).isEqualTo(4);
         assertThat(result.getHeaders().get("Access-Control-Allow-Origin")).isEqualTo("*");
         assertThat(result.getHeaders().get("Access-Control-Allow-Methods")).isEqualTo(
                 "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE");
         assertThat(result.getHeaders().get("Access-Control-Allow-Headers")).isEqualTo("Content-Type");
+        assertThat(result.getHeaders().get("Content-Type")).isEqualTo("application/json");
 
         String response = (String) result.getResult();
         assertThat(response).isEqualTo("test1");
@@ -110,11 +118,12 @@ public class MethodInvokerTest {
         RestResponseEntity result = methodInvoker.invoke(new TestRestFunction7(), req);
         assertThat(result.getStatusCode()).isEqualTo(200);
 
-        assertThat(result.getHeaders().size()).isEqualTo(3);
+        assertThat(result.getHeaders().size()).isEqualTo(4);
         assertThat(result.getHeaders().get("Access-Control-Allow-Origin")).isEqualTo("*");
         assertThat(result.getHeaders().get("Access-Control-Allow-Methods")).isEqualTo(
                 "GET, HEAD, POST, PUT, PATCH, DELETE, OPTIONS, TRACE");
         assertThat(result.getHeaders().get("Access-Control-Allow-Headers")).isEqualTo("*");
+        assertThat(result.getHeaders().get("Content-Type")).isEqualTo("application/json");
 
         String response = (String) result.getResult();
         assertThat(response).isEqualTo("test1");
@@ -128,7 +137,13 @@ public class MethodInvokerTest {
         req.setPath("/testRestPath9/");
         RestResponseEntity result = methodInvoker.invoke(new TestRestFunction9(), req);
         assertThat(result.getStatusCode()).isEqualTo(200);
-        assertThat(result.getHeaders().isEmpty()).isTrue();
+
+        Map<String, String> headers = result.getHeaders();
+        assertThat(headers.size()).isEqualTo(3);
+        assertThat(headers.get("testName")).isEqualTo("testValue");
+        assertThat(headers.get("Cookie")).isEqualTo("testCookieName=testCookieValue");
+        assertThat(headers.get("Content-Type")).isEqualTo("application/json");
+
         String response = (String) result.getResult();
         assertThat(response).isEqualTo("Hello");
     }
@@ -142,7 +157,9 @@ public class MethodInvokerTest {
         req.setQueryStringParameters(ImmutableMap.of("test1", "Hi"));
         RestResponseEntity result = methodInvoker.invoke(new TestRestFunction10(), req);
         assertThat(result.getStatusCode()).isEqualTo(200);
-        assertThat(result.getHeaders().isEmpty()).isTrue();
+        assertThat(result.getHeaders().size()).isEqualTo(1);
+        assertThat(result.getHeaders().get("Content-Type")).isEqualTo("application/json");
+
         String response = (String) result.getResult();
         assertThat(response).isEqualTo("/testRestPath10/");
     }
@@ -156,7 +173,9 @@ public class MethodInvokerTest {
         req.setHeaders(ImmutableMap.of("Cookie", "test1=Hello;"));
         RestResponseEntity result = methodInvoker.invoke(new TestRestFunction11(), req);
         assertThat(result.getStatusCode()).isEqualTo(200);
-        assertThat(result.getHeaders().isEmpty()).isTrue();
+        assertThat(result.getHeaders().size()).isEqualTo(1);
+        assertThat(result.getHeaders().get("Content-Type")).isEqualTo("application/json");
+
         String response = (String) result.getResult();
         assertThat(response).isEqualTo("Hello");
     }
@@ -264,7 +283,9 @@ public class MethodInvokerTest {
         req.setPath("/testRestPath2");
         RestResponseEntity result = methodInvoker.invoke(new TestRestFunction2(), req);
         assertThat(result.getStatusCode()).isEqualTo(200);
-        assertThat(result.getHeaders()).isEmpty();
+        assertThat(result.getHeaders().size()).isEqualTo(1);
+        assertThat(result.getHeaders().get("Content-Type")).isEqualTo("application/json");
+
         TestRestFunction2.Response func = (TestRestFunction2.Response) result.getResult();
         assertThat(func.firstName).isEqualTo("tempo");
         assertThat(func.lastName).isEqualTo("feng");
@@ -301,7 +322,9 @@ public class MethodInvokerTest {
         req.setPath("/testRestPath3");
         RestResponseEntity result = methodInvoker.invoke(new TestRestFunction3(), req);
         assertThat(result.getStatusCode()).isEqualTo(200);
-        assertThat(result.getHeaders()).isEmpty();
+        assertThat(result.getHeaders().size()).isEqualTo(1);
+        assertThat(result.getHeaders().get("Content-Type")).isEqualTo("application/json");
+
         TestRestFunction3.Response func = (TestRestFunction3.Response) result.getResult();
         assertThat(func.key1).isEqualTo("value1");
         assertThat(func.key2).isEqualTo(2);

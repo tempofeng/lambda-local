@@ -1,21 +1,31 @@
 package com.zaoo.lambda.rest;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
+import org.apache.http.cookie.Cookie;
+import org.apache.http.impl.cookie.BasicClientCookie;
+import org.apache.http.impl.cookie.DefaultCookieSpec;
+
+import javax.annotation.Nullable;
+import java.time.Instant;
+import java.util.*;
 
 public class RestResponseEntity {
-    private int statusCode;
-    private Object result;
-    private Map<String, String> headers;
+    private final int statusCode;
+    @Nullable
+    private final Object result;
+    @Nullable
+    private final String resultString;
+    private final Map<String, String> headers;
 
-    public RestResponseEntity() {
-        headers = new HashMap<>();
-    }
-
-    public RestResponseEntity(int statusCode, Object result, Map<String, String> headers) {
+    RestResponseEntity(int statusCode,
+                       @Nullable Object result,
+                       @Nullable String resultString,
+                       Map<String, String> headers) {
         this.statusCode = statusCode;
         this.result = result;
+        this.resultString = resultString;
         this.headers = headers;
     }
 
@@ -23,38 +33,86 @@ public class RestResponseEntity {
         return statusCode;
     }
 
-    public void setStatusCode(int statusCode) {
-        this.statusCode = statusCode;
-    }
-
-    public Object getResult() {
-        return result;
-    }
-
-    public void setResult(Object result) {
-        this.result = result;
-    }
-
     public Map<String, String> getHeaders() {
         return headers;
     }
 
-    public void setHeaders(Map<String, String> headers) {
-        this.headers = headers;
+    @Nullable
+    Object getResult() {
+        return result;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        RestResponseEntity that = (RestResponseEntity) o;
-        return statusCode == that.statusCode &&
-                Objects.equals(result, that.result) &&
-                Objects.equals(headers, that.headers);
+    @Nullable
+    String getResultString() {
+        return resultString;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(statusCode, result, headers);
+    public String getBody(ObjectMapper objectMapper) throws JsonProcessingException {
+        if (!Strings.isNullOrEmpty(resultString)) {
+            return resultString;
+        }
+        return objectMapper.writeValueAsString(result);
+    }
+
+    public static class Builder {
+        private int statusCode = 200;
+        private Object result;
+        private String resultString;
+        private Map<String, String> headers = new HashMap<>();
+        private List<Cookie> cookies = new ArrayList<>();
+
+        Builder withStatusCode(int statusCode) {
+            this.statusCode = statusCode;
+            return this;
+        }
+
+        Builder withResult(Object result) {
+            this.result = result;
+            if (Strings.isNullOrEmpty(headers.get("Content-Type"))) {
+                headers.put("Content-Type", "application/json");
+            }
+            return this;
+        }
+
+        Builder withResultString(String resultString) {
+            this.resultString = resultString;
+            if (Strings.isNullOrEmpty(headers.get("Content-Type"))) {
+                headers.put("Content-Type", "text/html");
+            }
+            return this;
+        }
+
+        Builder addHeader(String name, String value) {
+            headers.put(name, value);
+            return this;
+        }
+
+        Builder addHeaders(Map<String, String> h) {
+            headers.putAll(h);
+            return this;
+        }
+
+        Builder addCookie(String name, String value) {
+            cookies.add(new BasicClientCookie(name, value));
+            return this;
+        }
+
+        Builder addCookie(String name, String value, Instant expires, String path, String domain) {
+            BasicClientCookie clientCookie = new BasicClientCookie(name, value);
+            clientCookie.setExpiryDate(Date.from(expires));
+            clientCookie.setPath(path);
+            clientCookie.setDomain(domain);
+            cookies.add(clientCookie);
+            return this;
+        }
+
+        RestResponseEntity build() {
+            if (!cookies.isEmpty()) {
+                DefaultCookieSpec defaultCookieSpec = new DefaultCookieSpec();
+                defaultCookieSpec.formatCookies(cookies)
+                        .forEach(header -> headers.put(header.getName(), header.getValue()));
+            }
+            return new RestResponseEntity(statusCode, result, resultString, headers);
+        }
     }
 }

@@ -5,19 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaoo.lambda.LambdaProxyRequest;
 import com.zaoo.lambda.ObjectMappers;
 import org.apache.http.cookie.Cookie;
-import org.apache.http.cookie.CookieOrigin;
-import org.apache.http.cookie.CookieSpec;
-import org.apache.http.cookie.MalformedCookieException;
-import org.apache.http.impl.cookie.DefaultCookieSpec;
-import org.apache.http.message.BasicHeader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 class ParamRetriever {
     private static final Logger log = LoggerFactory.getLogger(ParamRetriever.class);
@@ -40,7 +32,7 @@ class ParamRetriever {
     Object retrieve(LambdaProxyRequest request, MethodInvocationContext context) {
         switch (type) {
             case ANNOTATION:
-                return retrieveByAnnotation(request, context);
+                return retrieveByAnnotation(context);
             case LAMBDA_PROXY_REQUEST:
                 return request;
             default:
@@ -48,12 +40,12 @@ class ParamRetriever {
         }
     }
 
-    private Object retrieveByAnnotation(LambdaProxyRequest request, MethodInvocationContext context) {
+    private Object retrieveByAnnotation(MethodInvocationContext context) {
         if (annotation instanceof RestParam) {
             RestParam restParam = (RestParam) annotation;
             String name = restParam.value();
             // Read from both post data and query string
-            String valueStr = request.getQueryStringParameters().get(name);
+            String valueStr = context.getQueryStringParameters().get(name);
             if (valueStr == null) {
                 valueStr = context.getPostParams().get(name);
             }
@@ -86,7 +78,8 @@ class ParamRetriever {
 
         if (annotation instanceof RestBody) {
             RestBody restBody = (RestBody) annotation;
-            if (request.getBody() == null || request.getBody().isEmpty()) {
+            String body = context.getBody();
+            if (body == null || body.isEmpty()) {
                 if (restBody.required()) {
                     throw new IllegalArgumentException("Request body can't be null");
                 }
@@ -94,7 +87,7 @@ class ParamRetriever {
             }
 
             try {
-                return objectMapper.readValue(request.getBody(), parameterJavaType);
+                return objectMapper.readValue(body, parameterJavaType);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -103,7 +96,7 @@ class ParamRetriever {
         if (annotation instanceof RestHeader) {
             RestHeader restHeader = (RestHeader) annotation;
             String name = restHeader.value();
-            String valueStr = request.getHeaders().get(name);
+            String valueStr = context.getHeaders().get(name);
             log.debug("getHeaderParam:annotation={},name={},value={}", annotation, name, valueStr);
             if (valueStr == null) {
                 if (restHeader.required()) {

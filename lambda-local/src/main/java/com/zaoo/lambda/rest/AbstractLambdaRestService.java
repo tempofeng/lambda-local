@@ -64,7 +64,7 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
             RestResponseEntity responseEntity = methodInvoker.invokeCorsPreflight(input);
             return new LambdaProxyResponse(responseEntity.getStatusCode(),
                     responseEntity.getHeaders(),
-                    objectMapper.writeValueAsString(responseEntity.getResult()));
+                    responseEntity.getBody(objectMapper));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -78,10 +78,9 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
             RestResponseEntity responseEntity = methodInvoker.invoke(this, input);
             return new LambdaProxyResponse(responseEntity.getStatusCode(),
                     responseEntity.getHeaders(),
-                    objectMapper.writeValueAsString(responseEntity.getResult()));
+                    responseEntity.getBody(objectMapper));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
-
 }

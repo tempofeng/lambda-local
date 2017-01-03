@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class MethodInvocationContext {
+class MethodInvocationContext {
     private static final Logger log = LoggerFactory.getLogger(MethodInvocationContext.class);
     private static final CookieSpec cookieSpec = new DefaultCookieSpec();
     private final String lambdaLocalPath;
@@ -90,5 +90,17 @@ public class MethodInvocationContext {
             log.warn(e.getLocalizedMessage(), e);
             return Collections.emptyMap();
         }
+    }
+
+    public Map<String, String> getQueryStringParameters() {
+        return request.getQueryStringParameters();
+    }
+
+    public String getBody() {
+        return request.getBody();
+    }
+
+    public Map<String, String> getHeaders() {
+        return request.getHeaders();
     }
 }
