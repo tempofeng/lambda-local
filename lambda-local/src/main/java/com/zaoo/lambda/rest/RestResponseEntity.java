@@ -61,12 +61,12 @@ public class RestResponseEntity {
         private Map<String, String> headers = new HashMap<>();
         private List<Cookie> cookies = new ArrayList<>();
 
-        Builder withStatusCode(int statusCode) {
+        public Builder withStatusCode(int statusCode) {
             this.statusCode = statusCode;
             return this;
         }
 
-        Builder withResult(Object result) {
+        public Builder withResult(Object result) {
             this.result = result;
             if (Strings.isNullOrEmpty(headers.get("Content-Type"))) {
                 headers.put("Content-Type", "application/json");
@@ -74,7 +74,7 @@ public class RestResponseEntity {
             return this;
         }
 
-        Builder withResultString(String resultString) {
+        public Builder withResultString(String resultString) {
             this.resultString = resultString;
             if (Strings.isNullOrEmpty(headers.get("Content-Type"))) {
                 headers.put("Content-Type", "text/html");
@@ -82,22 +82,22 @@ public class RestResponseEntity {
             return this;
         }
 
-        Builder addHeader(String name, String value) {
+        public Builder addHeader(String name, String value) {
             headers.put(name, value);
             return this;
         }
 
-        Builder addHeaders(Map<String, String> h) {
+        public Builder addHeaders(Map<String, String> h) {
             headers.putAll(h);
             return this;
         }
 
-        Builder addCookie(String name, String value) {
+        public Builder addCookie(String name, String value) {
             cookies.add(new BasicClientCookie(name, value));
             return this;
         }
 
-        Builder addCookie(String name, String value, Instant expires, String path, String domain) {
+        public Builder addCookie(String name, String value, Instant expires, String path, String domain) {
             BasicClientCookie clientCookie = new BasicClientCookie(name, value);
             clientCookie.setExpiryDate(Date.from(expires));
             clientCookie.setPath(path);
@@ -106,7 +106,7 @@ public class RestResponseEntity {
             return this;
         }
 
-        RestResponseEntity build() {
+        public RestResponseEntity build() {
             if (!cookies.isEmpty()) {
                 DefaultCookieSpec defaultCookieSpec = new DefaultCookieSpec();
                 defaultCookieSpec.formatCookies(cookies)
