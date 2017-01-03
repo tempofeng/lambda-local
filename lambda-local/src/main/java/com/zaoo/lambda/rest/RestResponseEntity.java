@@ -48,7 +48,7 @@ public class RestResponseEntity {
     }
 
     public String getBody(ObjectMapper objectMapper) throws JsonProcessingException {
-        if (!Strings.isNullOrEmpty(resultString)) {
+        if (resultString != null) {
             return resultString;
         }
         return objectMapper.writeValueAsString(result);
@@ -107,6 +107,10 @@ public class RestResponseEntity {
         }
 
         public RestResponseEntity build() {
+            if (resultString == null && result == null) {
+                throw new IllegalArgumentException("Either resultString or result must be set");
+            }
+
             if (!cookies.isEmpty()) {
                 DefaultCookieSpec defaultCookieSpec = new DefaultCookieSpec();
                 defaultCookieSpec.formatCookies(cookies)
