@@ -196,6 +196,19 @@ public class MethodInvokerTest {
         assertThat(response).isEqualTo("Hello");
     }
 
+    @Test
+    public void invoke_nullReturn() throws Exception {
+        Method method = TestRestFunction13.class.getMethod("test1");
+        MethodInvoker methodInvoker = new MethodInvoker(TestRestFunction13.class, method, "/testRestPath13");
+        LambdaProxyRequest req = new LambdaProxyRequest();
+        req.setPath("/testRestPath13/");
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction13(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
+
+        String response = (String) result.getResult();
+        assertThat(response).isEmpty();
+    }
+
     @SuppressWarnings("unchecked")
     @Test
     public void invoke_type_json_param1() throws Exception {

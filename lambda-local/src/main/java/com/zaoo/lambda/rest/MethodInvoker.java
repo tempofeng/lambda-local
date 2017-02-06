@@ -123,7 +123,7 @@ class MethodInvoker {
             }
 
             return new RestResponseEntity.Builder()
-                    .withResult(result)
+                    .withResult(result != null ? result : "")
                     .addHeaders(getCrossOriginHeaders(request))
                     .build();
         } catch (InvocationTargetException e) {
