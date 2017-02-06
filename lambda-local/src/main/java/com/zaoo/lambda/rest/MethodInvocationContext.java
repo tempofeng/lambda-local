@@ -66,7 +66,7 @@ class MethodInvocationContext {
 
     Map<String, String> parsePostParameters(LambdaProxyRequest request) {
         String contentType = request.getHeaders().get("Content-Type");
-        if (!"application/x-www-form-urlencoded".equals(contentType)) {
+        if(!contentType.contains("application/x-www-form-urlencoded")) {
             return Collections.emptyMap();
         }
 
