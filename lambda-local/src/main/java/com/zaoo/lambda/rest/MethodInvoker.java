@@ -127,11 +127,12 @@ class MethodInvoker {
                     .addHeaders(getCrossOriginHeaders(request))
                     .build();
         } catch (InvocationTargetException e) {
-            log.error(e.getLocalizedMessage(), e);
             Error error;
             if (e.getCause() != null) {
+                log.error(e.getCause().getLocalizedMessage(), e);
                 error = new Error(e.getCause().getLocalizedMessage(), e.getCause());
             } else {
+                log.error(e.getLocalizedMessage(), e);
                 error = new Error(e.getLocalizedMessage(), e);
             }
 
