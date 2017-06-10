@@ -129,7 +129,7 @@ class MethodInvoker {
         } catch (InvocationTargetException e) {
             Error error;
             if (e.getCause() != null) {
-                log.error(e.getCause().getLocalizedMessage(), e);
+                log.error(e.getCause().getLocalizedMessage(), e.getCause());
                 error = new Error(e.getCause().getLocalizedMessage(), e.getCause());
             } else {
                 log.error(e.getLocalizedMessage(), e);
