@@ -62,7 +62,7 @@ public class LambdaFunctionAnnotationScanner {
         String[] handlers = lambdaLocal.handler();
         Class<? extends LambdaRequestDeserializer<?>>[] deserializer = lambdaLocal.deserializer();
         Class<? extends LambdaResponseSerializer<?>>[] serializer = lambdaLocal.serializer();
-        log.trace("addLambdaFunction:paths={},cls={}", paths, cls.getSimpleName());
+        log.debug("addLambdaFunction:paths={},cls={}", paths, cls.getSimpleName());
 
         if (handlers.length == 0 & paths.length == 0) {
             throw new IllegalArgumentException(
