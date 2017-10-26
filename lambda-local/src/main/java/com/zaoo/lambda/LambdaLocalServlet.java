@@ -40,6 +40,7 @@ public class LambdaLocalServlet extends HttpServlet {
         lambdaFunctions = packageNames.stream()
                 .flatMap(packageName -> lambdaFunctionAnnotationScanner.listLambdaFunctions(packageName).stream())
                 .collect(Collectors.toList());
+        log.debug("initLambdaFunctions:{}", lambdaFunctions);
     }
 
     @Override
@@ -51,7 +52,7 @@ public class LambdaLocalServlet extends HttpServlet {
         }
 
         try {
-            log.debug("invokeLambdaFunction:lambdaLocalPath={},lambdaFunction={}", lambdaFunction.getPath(), lambdaFunction.getPath());
+            log.debug("invokeLambdaFunction:lambdaLocalPath={}", lambdaFunction.getPath());
             invokeLambdaFunction(req, resp, lambdaFunction);
         } catch (InstantiationException | IllegalAccessException e) {
             throw new IllegalArgumentException("Unable to find handler class:" + lambdaFunction.getHandlerClass(), e);
@@ -64,6 +65,7 @@ public class LambdaLocalServlet extends HttpServlet {
         String path = getRequestPath(req);
         LambdaFunction ret = null;
         for (LambdaFunction lambdaFunction : lambdaFunctions) {
+            log.debug("findingLambdaFunction:path={},functionPath={}", path, lambdaFunction.getPath());
             if (path.startsWith(lambdaFunction.getPath())) {
                 if (ret == null) {
                     ret = lambdaFunction;
