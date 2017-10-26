@@ -5,6 +5,8 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import org.reflections.ReflectionUtils;
 import org.reflections.Reflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
@@ -12,7 +14,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class LambdaFunctionAnnotationScanner {
+    private static final Logger log = LoggerFactory.getLogger(LambdaFunctionAnnotationScanner.class);
+
     public List<LambdaFunction> listLambdaFunctions(String packageName) {
+        log.debug("listLambdaFunctions:packageName={}", packageName);
         Reflections reflections = new Reflections(packageName);
         return reflections.getTypesAnnotatedWith(LambdaLocal.class).stream()
                 .flatMap(cls -> listLambdaFunctionFromAnotatedClass(cls).stream())
@@ -52,6 +57,7 @@ public class LambdaFunctionAnnotationScanner {
     }
 
     private List<LambdaFunction> listLambdaFunctionFromAnotatedClass(Class<?> cls) {
+        log.debug("listLambdaFunctionFromAnotatedClass:cls={}", cls.getSimpleName());
         LambdaLocal lambdaLocal = cls.getAnnotation(LambdaLocal.class);
         String[] paths = lambdaLocal.value();
         String[] handlers = lambdaLocal.handler();

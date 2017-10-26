@@ -35,7 +35,7 @@ ext {
     mockitoCore = 'org.mockito:mockito-core:2.2.5'
 
     // reflections
-    reflections = 'org.reflections:reflections:0.9.10'
+    reflections = 'org.reflections:reflections:0.9.11'
 
     // spring
     springCore = 'org.springframework:spring-core:4.3.3.RELEASE'
