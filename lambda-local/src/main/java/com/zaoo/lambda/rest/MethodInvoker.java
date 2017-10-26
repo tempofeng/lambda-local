@@ -31,7 +31,7 @@ class MethodInvoker {
     private final Map<String, String> headers = new HashMap<>();
 
     public MethodInvoker(Class<?> cls, Method method, String lambdaLocalPath) {
-        log.debug("addMethodInvocker:cls={},method={},path={}", cls.getSimpleName(), method.getName(), lambdaLocalPath);
+        log.debug("addMethodInvoker:cls={},method={},path={}", cls.getSimpleName(), method.getName(), lambdaLocalPath);
 
         this.method = method;
         this.lambdaLocalPath = lambdaLocalPath;
@@ -71,7 +71,9 @@ class MethodInvoker {
             Optional<Annotation> opt = Arrays.stream(annotations).filter(this::isRestAnnotation).findFirst();
             if (opt.isPresent()) {
                 Annotation annotation = opt.get();
-                log.debug("param:annotation={},type={}", annotation.annotationType().getSimpleName(), javaType.getTypeName());
+                log.debug("addParam:annotation={},type={}",
+                        annotation.annotationType().getSimpleName(),
+                        javaType.getTypeName());
                 RestParamDeserializer restParamDeserializer = createDeserializer(annotation);
                 paramRetrievers.add(new ParamRetriever(ParamRetriever.ParamRetrieverType.ANNOTATION,
                         javaType,
@@ -208,7 +210,7 @@ class MethodInvoker {
 
     public boolean match(LambdaProxyRequest input) {
         String restMethodPath = getRestMethodPath(input);
-        log.debug("findingMatchingMethod:methodPath={},requestPath={},restMethodPath={},resource={}",
+        log.trace("findingMatchingMethod:methodPath={},requestPath={},restMethodPath={},resource={}",
                 methodPath,
                 input.getPath(),
                 restMethodPath,
@@ -216,7 +218,7 @@ class MethodInvoker {
         if (pathMatcher.match(methodPath, restMethodPath)) {
             if (httpMethod == HttpMethod.ANY ||
                     httpMethod.equals(HttpMethod.valueOf(input.getHttpMethod().toUpperCase()))) {
-                log.debug("matchedMethodFound:methodPath={}", methodPath);
+                log.trace("matchedMethodFound:methodPath={}", methodPath);
                 return true;
             }
         }

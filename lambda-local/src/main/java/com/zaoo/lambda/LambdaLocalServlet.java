@@ -4,19 +4,18 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.AntPathMatcher;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class LambdaLocalServlet extends HttpServlet {
@@ -40,7 +39,6 @@ public class LambdaLocalServlet extends HttpServlet {
         lambdaFunctions = packageNames.stream()
                 .flatMap(packageName -> lambdaFunctionAnnotationScanner.listLambdaFunctions(packageName).stream())
                 .collect(Collectors.toList());
-        log.debug("initLambdaFunctions:{}", lambdaFunctions);
     }
 
     @Override
@@ -65,7 +63,6 @@ public class LambdaLocalServlet extends HttpServlet {
         String path = getRequestPath(req);
         LambdaFunction ret = null;
         for (LambdaFunction lambdaFunction : lambdaFunctions) {
-            log.debug("findingLambdaFunction:path={},functionPath={}", path, lambdaFunction.getPath());
             if (path.startsWith(lambdaFunction.getPath())) {
                 if (ret == null) {
                     ret = lambdaFunction;

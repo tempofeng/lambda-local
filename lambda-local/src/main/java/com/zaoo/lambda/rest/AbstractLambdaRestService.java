@@ -31,7 +31,6 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
         String lambdaLocalPath = lambdaLocal.value()[0];
 
         Set<Method> methods = ReflectionUtils.getMethods(cls, ReflectionUtils.withAnnotation(RestMethod.class));
-        log.debug("listMethods:cls={},methods={}", cls.getSimpleName(), methods);
         return methods.stream()
                 .map(method -> new MethodInvoker(cls, method, lambdaLocalPath))
                 .collect(Collectors.toList());

@@ -57,12 +57,12 @@ public class LambdaFunctionAnnotationScanner {
     }
 
     private List<LambdaFunction> listLambdaFunctionFromAnotatedClass(Class<?> cls) {
-        log.debug("listLambdaFunctionFromAnotatedClass:cls={}", cls.getSimpleName());
         LambdaLocal lambdaLocal = cls.getAnnotation(LambdaLocal.class);
         String[] paths = lambdaLocal.value();
         String[] handlers = lambdaLocal.handler();
         Class<? extends LambdaRequestDeserializer<?>>[] deserializer = lambdaLocal.deserializer();
         Class<? extends LambdaResponseSerializer<?>>[] serializer = lambdaLocal.serializer();
+        log.trace("addLambdaFunction:paths={},cls={}", paths, cls.getSimpleName());
 
         if (handlers.length == 0 & paths.length == 0) {
             throw new IllegalArgumentException(
