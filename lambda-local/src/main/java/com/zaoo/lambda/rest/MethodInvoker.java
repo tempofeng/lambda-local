@@ -31,6 +31,8 @@ class MethodInvoker {
     private final Map<String, String> headers = new HashMap<>();
 
     public MethodInvoker(Class<?> cls, Method method, String lambdaLocalPath) {
+        log.debug("addMethodInvocker:cls={},method={},path={}", cls.getSimpleName(), method.getName(), lambdaLocalPath);
+
         this.method = method;
         this.lambdaLocalPath = lambdaLocalPath;
 
@@ -69,6 +71,7 @@ class MethodInvoker {
             Optional<Annotation> opt = Arrays.stream(annotations).filter(this::isRestAnnotation).findFirst();
             if (opt.isPresent()) {
                 Annotation annotation = opt.get();
+                log.debug("param:annotation={},type={}", annotation.annotationType().getSimpleName(), javaType.getTypeName());
                 RestParamDeserializer restParamDeserializer = createDeserializer(annotation);
                 paramRetrievers.add(new ParamRetriever(ParamRetriever.ParamRetrieverType.ANNOTATION,
                         javaType,
@@ -76,6 +79,7 @@ class MethodInvoker {
                         restParamDeserializer
                 ));
             } else if (parameter.getType().isAssignableFrom(LambdaProxyRequest.class)) {
+                log.debug("addLambdaProxyRequest:type={}", javaType.getTypeName());
                 paramRetrievers.add(new ParamRetriever(ParamRetriever.ParamRetrieverType.LAMBDA_PROXY_REQUEST,
                         javaType,
                         new ErrorAnnotation(),
@@ -204,7 +208,7 @@ class MethodInvoker {
 
     public boolean match(LambdaProxyRequest input) {
         String restMethodPath = getRestMethodPath(input);
-        log.trace("findingMatchingMethod:methodPath={},requestPath={},restMethodPath={},resource={}",
+        log.debug("findingMatchingMethod:methodPath={},requestPath={},restMethodPath={},resource={}",
                 methodPath,
                 input.getPath(),
                 restMethodPath,
@@ -212,7 +216,7 @@ class MethodInvoker {
         if (pathMatcher.match(methodPath, restMethodPath)) {
             if (httpMethod == HttpMethod.ANY ||
                     httpMethod.equals(HttpMethod.valueOf(input.getHttpMethod().toUpperCase()))) {
-                log.trace("MatchingMethodFound:methodPath={}", methodPath);
+                log.debug("matchedMethodFound:methodPath={}", methodPath);
                 return true;
             }
         }

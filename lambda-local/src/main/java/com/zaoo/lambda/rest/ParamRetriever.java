@@ -50,7 +50,7 @@ class ParamRetriever {
                 valueStr = context.getPostParams().get(name);
             }
 
-            log.debug("getQueryParam:annotation={},name={},value={}", annotation, name, valueStr);
+            log.debug("getQueryParam:name={},value={}", name, valueStr);
             if (valueStr == null) {
                 if (restParam.required()) {
                     throw new IllegalArgumentException(String.format("Request param:%s can't be null", name));
@@ -65,7 +65,7 @@ class ParamRetriever {
             RestPath restPath = (RestPath) annotation;
             String name = restPath.value();
             String valueStr = context.getPathVariables().get(name);
-            log.debug("getPathParam:annotation={},name={},value={}", annotation, name, valueStr);
+            log.debug("getPathParam:name={},value={}", name, valueStr);
             if (valueStr == null) {
                 if (restPath.required()) {
                     throw new IllegalArgumentException(String.format("Path param:%s can't be null", name));
@@ -97,7 +97,7 @@ class ParamRetriever {
             RestHeader restHeader = (RestHeader) annotation;
             String name = restHeader.value();
             String valueStr = context.getHeaders().get(name);
-            log.debug("getHeaderParam:annotation={},name={},value={}", annotation, name, valueStr);
+            log.debug("getHeaderParam:name={},value={}", name, valueStr);
             if (valueStr == null) {
                 if (restHeader.required()) {
                     throw new IllegalArgumentException(String.format("Request header:%s can't be null", name));
@@ -112,7 +112,7 @@ class ParamRetriever {
             RestCookie restCookie = (RestCookie) annotation;
             String name = restCookie.value();
             Cookie cookie = context.getCookies().get(name);
-            log.debug("getCookieParam:annotation={},name={},value={}", annotation, name, cookie);
+            log.debug("getCookieParam:name={},value={}", name, cookie);
             if (cookie == null) {
                 if (restCookie.required()) {
                     throw new IllegalArgumentException(String.format("Cookie:%s can't be null", name));
