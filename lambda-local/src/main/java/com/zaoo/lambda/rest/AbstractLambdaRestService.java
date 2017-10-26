@@ -8,7 +8,9 @@ import org.reflections.ReflectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class AbstractLambdaRestService extends AbstractLambdaLocalRequestHandler {
@@ -28,7 +30,9 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
         }
         String lambdaLocalPath = lambdaLocal.value()[0];
 
-        return ReflectionUtils.getMethods(cls, ReflectionUtils.withAnnotation(RestMethod.class)).stream()
+        Set<Method> methods = ReflectionUtils.getMethods(cls, ReflectionUtils.withAnnotation(RestMethod.class));
+        log.debug("listMethods:cls={},methods={}", cls.getSimpleName(), methods);
+        return methods.stream()
                 .map(method -> new MethodInvoker(cls, method, lambdaLocalPath))
                 .collect(Collectors.toList());
     }

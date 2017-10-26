@@ -51,7 +51,7 @@ public class LambdaLocalServlet extends HttpServlet {
         }
 
         try {
-            log.debug("invokeLambdaFunction:lambdaLocalPath={}", lambdaFunction.getPath());
+            log.debug("invokeLambdaFunction:lambdaLocalPath={},lambdaFunction={}", lambdaFunction.getPath(), lambdaFunction.getPath());
             invokeLambdaFunction(req, resp, lambdaFunction);
         } catch (InstantiationException | IllegalAccessException e) {
             throw new IllegalArgumentException("Unable to find handler class:" + lambdaFunction.getHandlerClass(), e);
