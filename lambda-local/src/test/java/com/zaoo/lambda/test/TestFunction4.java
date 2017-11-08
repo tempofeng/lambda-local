@@ -15,12 +15,12 @@ import java.io.OutputStream;
 
 @LambdaLocal(value = "/testPath4")
 public class TestFunction4 implements RequestStreamHandler {
-    private final ObjectReader objectReader = ObjectMappers.getInstance();
+    private final ObjectReader objectReader = ObjectMappers.getReader();
     private final ObjectWriter objectWriter = ObjectMappers.getWriter();
 
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
-        LambdaProxyRequest request = objectReader.readValue(input);
+        LambdaProxyRequest request = objectReader.forType(LambdaProxyRequest.class).readValue(input);
         LambdaProxyResponse response = new LambdaProxyResponse(request.getBody());
         objectWriter.writeValue(output, response);
     }

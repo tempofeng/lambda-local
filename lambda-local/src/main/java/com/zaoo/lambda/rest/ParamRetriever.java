@@ -17,7 +17,7 @@ class ParamRetriever {
     private final JavaType parameterJavaType;
     private final Annotation annotation;
     private final RestParamDeserializer<?> restParamDeserializer;
-    private final ObjectReader objectReader = ObjectMappers.getInstance();
+    private final ObjectReader objectReader = ObjectMappers.getReader();
 
     ParamRetriever(ParamRetrieverType type,
                    JavaType parameterJavaType,

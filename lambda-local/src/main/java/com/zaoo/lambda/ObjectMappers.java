@@ -14,7 +14,7 @@ public class ObjectMappers {
         OBJECT_WRITER = objectMapper.writer();
     }
 
-    public static ObjectReader getInstance() {
+    public static ObjectReader getReader() {
         return OBJECT_READER;
     }
 

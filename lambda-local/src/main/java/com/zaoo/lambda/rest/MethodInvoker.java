@@ -2,7 +2,6 @@ package com.zaoo.lambda.rest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
@@ -30,7 +29,7 @@ class MethodInvoker {
     private final String methodPath;
     private final HttpMethod httpMethod;
     private final Map<String, String> headers = new HashMap<>();
-    private final ObjectReader objectReader = ObjectMappers.getInstance();
+    private final ObjectReader objectReader = ObjectMappers.getReader();
 
     public MethodInvoker(Class<?> cls, Method method, String lambdaLocalPath) {
         log.debug("addMethodInvoker:cls={},method={},path={}", cls.getSimpleName(), method.getName(), lambdaLocalPath);

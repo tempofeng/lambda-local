@@ -13,7 +13,7 @@ import java.io.IOException;
  */
 public class JsonRestParamDeserializer implements RestParamDeserializer<Object> {
     private static final Logger log = LoggerFactory.getLogger(JsonRestParamDeserializer.class);
-    private final ObjectReader objectReader = ObjectMappers.getInstance();
+    private final ObjectReader objectReader = ObjectMappers.getReader();
 
     @Override
     public Object deserialize(String str, JavaType javaType) {
