@@ -2,6 +2,7 @@ package com.zaoo.lambda.rest;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.google.common.base.Strings;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
@@ -47,11 +48,11 @@ public class RestResponseEntity {
         return resultString;
     }
 
-    public String getBody(ObjectMapper objectMapper) throws JsonProcessingException {
+    public String getBody(ObjectWriter objectWriter) throws JsonProcessingException {
         if (resultString != null) {
             return resultString;
         }
-        return objectMapper.writeValueAsString(result);
+        return objectWriter.writeValueAsString(result);
     }
 
     public static class Builder {

@@ -1,20 +1,25 @@
 package com.zaoo.lambda;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.afterburner.AfterburnerModule;
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class ObjectMappers {
-    private static final ObjectMapper OBJECT_MAPPER;
+    private static final ObjectReader OBJECT_READER;
+    private static final ObjectWriter OBJECT_WRITER;
 
     static {
-        OBJECT_MAPPER = new ObjectMapper();
-        OBJECT_MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        OBJECT_MAPPER.registerModule(new AfterburnerModule());
+        ObjectMapper objectMapper = new ObjectMapper();
+        OBJECT_READER = objectMapper.reader();
+        OBJECT_WRITER = objectMapper.writer();
     }
 
-    public static ObjectMapper getInstance() {
-        return OBJECT_MAPPER;
+    public static ObjectReader getInstance() {
+        return OBJECT_READER;
+    }
+
+    public static ObjectWriter getWriter() {
+        return OBJECT_WRITER;
     }
 
     private ObjectMappers() {

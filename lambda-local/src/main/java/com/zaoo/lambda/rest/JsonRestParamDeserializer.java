@@ -1,7 +1,7 @@
 package com.zaoo.lambda.rest;
 
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.zaoo.lambda.ObjectMappers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,7 @@ import java.io.IOException;
  */
 public class JsonRestParamDeserializer implements RestParamDeserializer<Object> {
     private static final Logger log = LoggerFactory.getLogger(JsonRestParamDeserializer.class);
-    private final ObjectMapper objectMapper = ObjectMappers.getInstance();
+    private final ObjectReader objectReader = ObjectMappers.getInstance();
 
     @Override
     public Object deserialize(String str, JavaType javaType) {
@@ -40,7 +40,7 @@ public class JsonRestParamDeserializer implements RestParamDeserializer<Object> 
         }
 
         try {
-            return objectMapper.readValue(str, javaType);
+            return objectReader.forType(javaType).readValue(str);
         } catch (IOException e) {
             log.warn("Unable to parse obj in JSON", e);
             // Unable to read the str as JSON.

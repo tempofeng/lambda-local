@@ -1,7 +1,7 @@
 package com.zaoo.lambda.rest;
 
 import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.zaoo.lambda.LambdaProxyRequest;
 import com.zaoo.lambda.ObjectMappers;
 import org.apache.http.cookie.Cookie;
@@ -17,7 +17,7 @@ class ParamRetriever {
     private final JavaType parameterJavaType;
     private final Annotation annotation;
     private final RestParamDeserializer<?> restParamDeserializer;
-    private final ObjectMapper objectMapper = ObjectMappers.getInstance();
+    private final ObjectReader objectReader = ObjectMappers.getInstance();
 
     ParamRetriever(ParamRetrieverType type,
                    JavaType parameterJavaType,
@@ -87,7 +87,7 @@ class ParamRetriever {
             }
 
             try {
-                return objectMapper.readValue(body, parameterJavaType);
+                return objectReader.forType(parameterJavaType).readValue(body);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

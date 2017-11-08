@@ -3,6 +3,7 @@ package com.zaoo.lambda.rest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.zaoo.lambda.LambdaProxyRequest;
@@ -29,6 +30,7 @@ class MethodInvoker {
     private final String methodPath;
     private final HttpMethod httpMethod;
     private final Map<String, String> headers = new HashMap<>();
+    private final ObjectReader objectReader = ObjectMappers.getInstance();
 
     public MethodInvoker(Class<?> cls, Method method, String lambdaLocalPath) {
         log.debug("addMethodInvoker:cls={},method={},path={}", cls.getSimpleName(), method.getName(), lambdaLocalPath);
@@ -60,13 +62,12 @@ class MethodInvoker {
         methodPath = restMethod.path();
         httpMethod = restMethod.httpMethod();
 
-        ObjectMapper objectMapper = ObjectMappers.getInstance();
         Parameter[] parameters = method.getParameters();
         Type[] parameterTypes = method.getGenericParameterTypes();
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < parameters.length; i++) {
             Parameter parameter = parameters[i];
-            JavaType javaType = objectMapper.getTypeFactory().constructType(parameterTypes[i]);
+            JavaType javaType = objectReader.getTypeFactory().constructType(parameterTypes[i]);
             Annotation[] annotations = parameterAnnotations[i];
             Optional<Annotation> opt = Arrays.stream(annotations).filter(this::isRestAnnotation).findFirst();
             if (opt.isPresent()) {
