@@ -23,7 +23,6 @@ dependencies {
     compile rootProject.ext.jacksonCore
     compile rootProject.ext.jacksonDatabind
     compile rootProject.ext.jacksonAnnotation
-    compile rootProject.ext.jacksonModuleAfterburner
 
     // jsr305
     compile rootProject.ext.jsr305
