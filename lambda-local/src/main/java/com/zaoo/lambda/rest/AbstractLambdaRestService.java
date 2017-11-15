@@ -2,7 +2,6 @@ package com.zaoo.lambda.rest;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaoo.lambda.*;
 import org.reflections.ReflectionUtils;
 import org.slf4j.Logger;
@@ -18,12 +17,11 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
     private final List<MethodInvoker> methodInvokers;
 
     public AbstractLambdaRestService() {
-        ObjectMappers.setObjectMapperFactory(getObjectMapperFactory());
         methodInvokers = createMethodInvokers(getClass());
     }
 
-    protected ObjectMapperFactory getObjectMapperFactory() {
-        return ObjectMapper::new;
+    protected void setObjectMapperFactory(ObjectMapperFactory objectMapperFactory) {
+        ObjectMappers.setObjectMapperFactory(objectMapperFactory);
     }
 
     @SuppressWarnings("unchecked")
