@@ -2,6 +2,7 @@ package com.zaoo.lambda;
 
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
+import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,12 +28,22 @@ public class LambdaLocalServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
 
-        String packages = config.getInitParameter("packages");
-        if (packages == null) {
-            throw new IllegalArgumentException("Unable to find 'init-param:packages' in servlet config");
-        }
+        try {
+            String objectMapperFactory = config.getInitParameter("objectMapperFactory");
+            if (Strings.isNullOrEmpty(objectMapperFactory)) {
+                Class<? extends ObjectMapperFactory> cls = Class.forName(objectMapperFactory).asSubclass(
+                        ObjectMapperFactory.class);
+                ObjectMappers.setObjectMapperFactory(cls.newInstance());
+            }
 
-        initLambdaFunctions(Arrays.asList(packages.split(",")));
+            String packages = config.getInitParameter("packages");
+            if (Strings.isNullOrEmpty(packages)) {
+                throw new IllegalArgumentException("Unable to find 'init-param:packages' in servlet config");
+            }
+            initLambdaFunctions(Arrays.asList(packages.split(",")));
+        } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+            throw new ServletException(e.getLocalizedMessage(), e);
+        }
     }
 
     private void initLambdaFunctions(List<String> packageNames) {

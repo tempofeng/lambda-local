@@ -5,21 +5,34 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.databind.ObjectWriter;
 
 public class ObjectMappers {
-    private static final ObjectReader OBJECT_READER;
-    private static final ObjectWriter OBJECT_WRITER;
+    private static ObjectMapper objectMapper;
+    private static ObjectReader objectReader;
+    private static ObjectWriter objectWriter;
 
     static {
-        ObjectMapper objectMapper = new ObjectMapper();
-        OBJECT_READER = objectMapper.reader();
-        OBJECT_WRITER = objectMapper.writer();
+        createInstance(ObjectMapper::new);
+    }
+
+    private static void createInstance(ObjectMapperFactory objectMapperFactory) {
+        objectMapper = objectMapperFactory.createInstance();
+        objectReader = objectMapper.reader();
+        objectWriter = objectMapper.writer();
+    }
+
+    public static ObjectMapper getObjectMapper() {
+        return objectMapper;
     }
 
     public static ObjectReader getReader() {
-        return OBJECT_READER;
+        return objectReader;
     }
 
     public static ObjectWriter getWriter() {
-        return OBJECT_WRITER;
+        return objectWriter;
+    }
+
+    public static void setObjectMapperFactory(ObjectMapperFactory objectMapperFactory) {
+        createInstance(objectMapperFactory);
     }
 
     private ObjectMappers() {

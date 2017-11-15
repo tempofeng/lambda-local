@@ -9,7 +9,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public abstract class AbstractJacksonRequestHandler<I, O> implements RequestStreamHandler {
-    private final ObjectMapper objectMapper = new ObjectMapper();
     private final Class<I> inputClass;
 
     public AbstractJacksonRequestHandler(Class<I> inputClass) {
@@ -18,9 +17,9 @@ public abstract class AbstractJacksonRequestHandler<I, O> implements RequestStre
 
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
-        I inputObj = objectMapper.readValue(input, inputClass);
+        I inputObj = ObjectMappers.getReader().forType(inputClass).readValue(input);
         O outputObj = handleRequest(inputObj, context);
-        objectMapper.writeValue(output, outputObj);
+        ObjectMappers.getWriter().writeValue(output, outputObj);
     }
 
     /**

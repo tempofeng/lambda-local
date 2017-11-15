@@ -2,7 +2,7 @@ package com.zaoo.lambda.rest;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaoo.lambda.*;
 import org.reflections.ReflectionUtils;
 import org.slf4j.Logger;
@@ -16,12 +16,17 @@ import java.util.stream.Collectors;
 public abstract class AbstractLambdaRestService extends AbstractLambdaLocalRequestHandler {
     private static final Logger log = LoggerFactory.getLogger(AbstractLambdaRestService.class);
     private final List<MethodInvoker> methodInvokers;
-    private final ObjectWriter objectWriter = ObjectMappers.getWriter();
 
     public AbstractLambdaRestService() {
+        ObjectMappers.setObjectMapperFactory(getObjectMapperFactory());
         methodInvokers = createMethodInvokers(getClass());
     }
 
+    protected ObjectMapperFactory getObjectMapperFactory() {
+        return ObjectMapper::new;
+    }
+
+    @SuppressWarnings("unchecked")
     List<MethodInvoker> createMethodInvokers(Class<?> cls) {
         LambdaLocal lambdaLocal = cls.getAnnotation(LambdaLocal.class);
         if (lambdaLocal.value().length != 1) {
@@ -67,7 +72,7 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
             RestResponseEntity responseEntity = methodInvoker.invokeCorsPreflight(input);
             return new LambdaProxyResponse(responseEntity.getStatusCode(),
                     responseEntity.getHeaders(),
-                    responseEntity.getBody(objectWriter));
+                    responseEntity.getBody(ObjectMappers.getWriter()));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -81,7 +86,7 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
             RestResponseEntity responseEntity = methodInvoker.invoke(this, input);
             return new LambdaProxyResponse(responseEntity.getStatusCode(),
                     responseEntity.getHeaders(),
-                    responseEntity.getBody(objectWriter));
+                    responseEntity.getBody(ObjectMappers.getWriter()));
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

@@ -2,8 +2,6 @@ package com.zaoo.lambda.test;
 
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.zaoo.lambda.LambdaLocal;
 import com.zaoo.lambda.LambdaProxyRequest;
 import com.zaoo.lambda.LambdaProxyResponse;
@@ -15,13 +13,11 @@ import java.io.OutputStream;
 
 @LambdaLocal(value = "/testPath4")
 public class TestFunction4 implements RequestStreamHandler {
-    private final ObjectReader objectReader = ObjectMappers.getReader();
-    private final ObjectWriter objectWriter = ObjectMappers.getWriter();
 
     @Override
     public void handleRequest(InputStream input, OutputStream output, Context context) throws IOException {
-        LambdaProxyRequest request = objectReader.forType(LambdaProxyRequest.class).readValue(input);
+        LambdaProxyRequest request = ObjectMappers.getReader().forType(LambdaProxyRequest.class).readValue(input);
         LambdaProxyResponse response = new LambdaProxyResponse(request.getBody());
-        objectWriter.writeValue(output, response);
+        ObjectMappers.getWriter().writeValue(output, response);
     }
 }
