@@ -34,7 +34,8 @@ public class JsonRestParamDeserializer implements RestParamDeserializer<Object> 
             return Boolean.parseBoolean(str);
         }
         if (Enum.class.isAssignableFrom(javaType.getRawClass())) {
-            return Enum.valueOf((Class) javaType.getRawClass(), str);
+            Class<?> rawClass = javaType.getRawClass();
+            return toEnum(str, rawClass);
         }
 
         try {
@@ -45,5 +46,9 @@ public class JsonRestParamDeserializer implements RestParamDeserializer<Object> 
         }
 
         throw new IllegalArgumentException("Unable to get RestParamDeserializer of this type:" + javaType);
+    }
+
+    private Enum toEnum(String str, Class rawClass) {
+        return Enum.valueOf(rawClass, str);
     }
 }
