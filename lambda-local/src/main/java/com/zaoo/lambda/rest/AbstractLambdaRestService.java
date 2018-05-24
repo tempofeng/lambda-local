@@ -49,7 +49,9 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
         }
 
         // CORS pre-flight requests
-        String accessControlRequestMethod = input.getHeaders().get("Access-Control-Request-Method");
+        String accessControlRequestMethod = input.getHeaders().get("Access-Control-Request-Method") != null ?
+                input.getHeaders().get("Access-Control-Request-Method") :
+                input.getHeaders().get("access-control-request-method"); // axios: shouldn't use lower case
         if (httpMethod == HttpMethod.OPTIONS && accessControlRequestMethod != null) {
             // Use AccessControlRequestMethod as HttpMethod
             input.setHttpMethod(accessControlRequestMethod.toUpperCase());
@@ -60,9 +62,10 @@ public abstract class AbstractLambdaRestService extends AbstractLambdaLocalReque
             }
         }
 
-        throw new IllegalArgumentException(String.format("Unhandled request:path=%s,method=%s",
+        throw new IllegalArgumentException(String.format("Unhandled request:path=%s,method=%s,accessControlRequestMethod=%s",
                 input.getPath(),
-                httpMethod));
+                httpMethod,
+                accessControlRequestMethod));
     }
 
     private LambdaProxyResponse invokeCorsPreflightMethod(MethodInvoker methodInvoker, LambdaProxyRequest input) {

@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'maven'
 
 compileJava {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -51,4 +52,12 @@ dependencies {
 
     // spring-test
     testCompile rootProject.ext.springTest
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: LOCAL_MVN_REPO)
+        }
+    }
 }
