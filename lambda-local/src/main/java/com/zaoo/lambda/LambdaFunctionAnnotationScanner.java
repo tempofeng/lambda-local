@@ -20,7 +20,7 @@ public class LambdaFunctionAnnotationScanner {
         log.debug("listLambdaFunctions:packageName={}", packageName);
         Reflections reflections = new Reflections(packageName);
         return reflections.getTypesAnnotatedWith(LambdaLocal.class).stream()
-                .flatMap(cls -> listLambdaFunctionFromAnotatedClass(cls).stream())
+                .flatMap(cls -> listLambdaFunctionFromAnnotatedClass(cls).stream())
                 .collect(Collectors.toList());
     }
 
@@ -56,7 +56,7 @@ public class LambdaFunctionAnnotationScanner {
         }
     }
 
-    private List<LambdaFunction> listLambdaFunctionFromAnotatedClass(Class<?> cls) {
+    private List<LambdaFunction> listLambdaFunctionFromAnnotatedClass(Class<?> cls) {
         LambdaLocal lambdaLocal = cls.getAnnotation(LambdaLocal.class);
         String[] paths = lambdaLocal.value();
         String[] handlers = lambdaLocal.handler();

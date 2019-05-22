@@ -30,7 +30,7 @@ public class LambdaLocalServlet extends HttpServlet {
 
         try {
             String objectMapperFactory = config.getInitParameter("objectMapperFactory");
-            if (Strings.isNullOrEmpty(objectMapperFactory)) {
+            if (!Strings.isNullOrEmpty(objectMapperFactory)) {
                 Class<? extends ObjectMapperFactory> cls = Class.forName(objectMapperFactory).asSubclass(
                         ObjectMapperFactory.class);
                 ObjectMappers.setObjectMapperFactory(cls.newInstance());

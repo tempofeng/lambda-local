@@ -1,5 +1,9 @@
+import jp.classmethod.aws.gradle.lambda.AWSLambdaMigrateFunctionTask
+
 apply plugin: 'java'
 apply plugin: 'war'
+apply plugin: 'com.github.johnrengelman.shadow'
+apply plugin: 'jp.classmethod.aws.lambda'
 apply from: 'https://raw.github.com/akhikhl/gretty/master/pluginScripts/gretty.plugin'
 
 compileJava {
@@ -62,4 +66,33 @@ test {
     testLogging {
         exceptionFormat = 'full'
     }
+}
+
+aws {
+    profileName = 'zaoo'
+    region = project.hasProperty('awsRegion') ? awsRegion : 'ap-southeast-1'
+}
+
+lambda {
+    region = project.hasProperty('awsRegion') ? awsRegion : 'ap-southeast-1'
+}
+
+task deployHelloRestService(type: AWSLambdaMigrateFunctionTask, dependsOn: [shadowJar, test]) {
+    handler = "com.zaoo.lambda.example.HelloRestService"
+    functionName = "lleHelloRestService"
+    runtime = com.amazonaws.services.lambda.model.Runtime.Java8
+    role = "arn:aws:iam::${aws.accountId}:role/lambda_basic_execution"
+    zipFile = shadowJar.archivePath
+    memorySize = 512
+    timeout = 900
+}
+
+task deployHelloRootService(type: AWSLambdaMigrateFunctionTask, dependsOn: [shadowJar, test]) {
+    handler = "com.zaoo.lambda.example.HelloRootService"
+    functionName = "lleHelloRootService"
+    runtime = com.amazonaws.services.lambda.model.Runtime.Java8
+    role = "arn:aws:iam::${aws.accountId}:role/lambda_basic_execution"
+    zipFile = shadowJar.archivePath
+    memorySize = 512
+    timeout = 900
 }

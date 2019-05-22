@@ -11,6 +11,8 @@ buildscript {
 
     dependencies {
         classpath 'com.github.ben-manes:gradle-versions-plugin:0.21.0'
+        classpath "jp.classmethod.aws:gradle-aws-plugin:0.38"
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
     }
 }
 

@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.Objects;
 
-class LambdaFunction {
+public class LambdaFunction {
     private final String path;
     private final Class handlerClass;
     private final Method handlerMethod;
