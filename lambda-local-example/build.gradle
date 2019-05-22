@@ -78,20 +78,22 @@ lambda {
 }
 
 task deployHelloRestService(type: AWSLambdaMigrateFunctionTask, dependsOn: [shadowJar, test]) {
+    def accountId = aws.accountId ? aws.accountId : ""
     handler = "com.zaoo.lambda.example.HelloRestService"
     functionName = "lleHelloRestService"
     runtime = com.amazonaws.services.lambda.model.Runtime.Java8
-    role = "arn:aws:iam::${aws.accountId}:role/lambda_basic_execution"
+    role = "arn:aws:iam::${accountId}:role/lambda_basic_execution"
     zipFile = shadowJar.archivePath
     memorySize = 512
     timeout = 900
 }
 
 task deployHelloRootService(type: AWSLambdaMigrateFunctionTask, dependsOn: [shadowJar, test]) {
+    def accountId = aws.accountId ? aws.accountId : ""
     handler = "com.zaoo.lambda.example.HelloRootService"
     functionName = "lleHelloRootService"
     runtime = com.amazonaws.services.lambda.model.Runtime.Java8
-    role = "arn:aws:iam::${aws.accountId}:role/lambda_basic_execution"
+    role = "arn:aws:iam::${accountId}:role/lambda_basic_execution"
     zipFile = shadowJar.archivePath
     memorySize = 512
     timeout = 900
