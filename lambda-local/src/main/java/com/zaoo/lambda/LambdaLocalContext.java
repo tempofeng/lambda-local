@@ -4,7 +4,7 @@ import com.amazonaws.services.lambda.runtime.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletRequest;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.Map;
 
@@ -13,14 +13,23 @@ import java.util.Map;
  */
 public class LambdaLocalContext implements Context {
     private static final Logger log = LoggerFactory.getLogger(LambdaLocalContext.class);
-
     private final String awsRequestId = "EXAMPLE_REQUEST_ID";
     private final ClientContext clientContext = new LambdaLocalClientContext();
     private final String functionName = "EXAMPLE_FUNCTION_NAME";
     private final CognitoIdentity identity = new LambdaLocalCognitoIdentity();
     private final String logGroupName = "EXAMPLE_LOG_GROUP_NAME";
     private final String logStreamName = "EXAMPLE_STREAM_NAME";
-    private final LambdaLogger logger = log::info;
+    private final LambdaLogger logger = new LambdaLogger() {
+        @Override
+        public void log(String message) {
+            log.info(message);
+        }
+
+        @Override
+        public void log(byte[] message) {
+            log.info(new String(message, StandardCharsets.UTF_8));
+        }
+    };
     private final int memoryLimitInMB = 128;
     private final int remainingTimeInMillis = 15000;
 
