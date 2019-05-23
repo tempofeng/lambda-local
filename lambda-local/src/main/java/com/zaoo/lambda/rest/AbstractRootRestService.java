@@ -5,13 +5,16 @@ import com.zaoo.lambda.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public abstract class AbstractRootRestService extends AbstractLambdaLocalRequestHandler {
     private static final Logger log = LoggerFactory.getLogger(AbstractRootRestService.class);
     private final LambdaFunctionAnnotationScanner lambdaFunctionAnnotationScanner = new LambdaFunctionAnnotationScanner();
     private final List<LambdaFunction> lambdaFunctions;
+    private final Map<String, Object> lambdaFunctionHandlers = new HashMap<>();
 
     abstract protected List<String> getPackages();
 
@@ -60,10 +63,16 @@ public abstract class AbstractRootRestService extends AbstractLambdaLocalRequest
             throw new IllegalArgumentException("Handler must be a subclass of AbstractLambdaLocalRequestHandler:class=" + handler.getClass().getName());
         }
         AbstractLambdaLocalRequestHandler requestHandler = (AbstractLambdaLocalRequestHandler) handler;
-        return (LambdaProxyResponse) requestHandler.handleRequest(input, context);
+        return requestHandler.handleRequest(input, context);
     }
 
     private Object getLambdaFunctionObj(LambdaFunction lambdaFunction) throws InstantiationException, IllegalAccessException {
-        return lambdaFunction.getHandlerClass().newInstance();
+        Object handler = lambdaFunctionHandlers.get(lambdaFunction.getHandlerClass().getName());
+        if (handler != null) {
+            return handler;
+        }
+        handler = lambdaFunction.getHandlerClass().newInstance();
+        lambdaFunctionHandlers.put(lambdaFunction.getHandlerClass().getName(), handler);
+        return handler;
     }
 }
