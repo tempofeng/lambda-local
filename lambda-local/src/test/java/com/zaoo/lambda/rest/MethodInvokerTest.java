@@ -153,7 +153,7 @@ public class MethodInvokerTest {
         Method method = TestRestFunction10.class.getMethod("test1", String.class, LambdaProxyRequest.class);
         MethodInvoker methodInvoker = new MethodInvoker(TestRestFunction10.class, method, "/testRestPath10");
         LambdaProxyRequest req = new LambdaProxyRequest();
-        req.setPath("/testRestPath10/");
+        req.setPath("/testRestPath10/test1");
         req.setQueryStringParameters(ImmutableMap.of("test1", "Hi"));
         RestResponseEntity result = methodInvoker.invoke(new TestRestFunction10(), req);
         assertThat(result.getStatusCode()).isEqualTo(200);
@@ -161,7 +161,25 @@ public class MethodInvokerTest {
         assertThat(result.getHeaders().get("Content-Type")).isEqualTo("application/json");
 
         String response = (String) result.getResult();
-        assertThat(response).isEqualTo("/testRestPath10/");
+        assertThat(response).isEqualTo("Hi,/testRestPath10/test1");
+    }
+    
+    @Test
+    public void invoke_lambdaProxyRequest_post() throws Exception {
+        Method method = TestRestFunction10.class.getMethod("test2", String.class, LambdaProxyRequest.class);
+        MethodInvoker methodInvoker = new MethodInvoker(TestRestFunction10.class, method, "/testRestPath10");
+        LambdaProxyRequest req = new LambdaProxyRequest();
+        req.setHttpMethod("POST");
+        req.setHeaders(ImmutableMap.of("Content-Type", "application/x-www-form-urlencoded"));
+        req.setPath("/testRestPath10/test2");
+        req.setBody("test2=Hi");
+        RestResponseEntity result = methodInvoker.invoke(new TestRestFunction10(), req);
+        assertThat(result.getStatusCode()).isEqualTo(200);
+        assertThat(result.getHeaders().size()).isEqualTo(1);
+        assertThat(result.getHeaders().get("Content-Type")).isEqualTo("application/json");
+
+        String response = (String) result.getResult();
+        assertThat(response).isEqualTo("Hi,/testRestPath10/test2");
     }
 
     @Test

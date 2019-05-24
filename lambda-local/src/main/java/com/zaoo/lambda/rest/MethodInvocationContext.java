@@ -65,12 +65,16 @@ class MethodInvocationContext {
     }
 
     Map<String, String> parsePostParameters(LambdaProxyRequest request) {
-        String contentType = request.getHeaders().get("Content-Type");
-        if(contentType == null || !contentType.contains("application/x-www-form-urlencoded")) {
+        String contentType = request.getHeaders().get("Content-Type") != null ?
+                request.getHeaders().get("Content-Type") :
+                request.getHeaders().get("content-type");
+        log.debug("parsePostParameters:contentType={}", contentType);
+        if (contentType == null || !contentType.contains("application/x-www-form-urlencoded")) {
             return Collections.emptyMap();
         }
 
         String body = request.getBody();
+        log.debug("parsePostParameters:body={}", contentType);
         if (Strings.isNullOrEmpty(body)) {
             return Collections.emptyMap();
         }
@@ -81,7 +85,10 @@ class MethodInvocationContext {
 
     private Map<String, Cookie> parseCookies(LambdaProxyRequest request) {
         try {
-            BasicHeader header = new BasicHeader("Cookie", request.getHeaders().get("Cookie"));
+            String cookieHeader = request.getHeaders().get("Cookie") != null ?
+                    request.getHeaders().get("Cookie") :
+                    request.getHeaders().get("cookie");
+            BasicHeader header = new BasicHeader("Cookie", cookieHeader);
             // we need the value only.
             CookieOrigin origin = new CookieOrigin("dummy", 80, request.getPath(), false);
             return cookieSpec.parse(header, origin).stream()

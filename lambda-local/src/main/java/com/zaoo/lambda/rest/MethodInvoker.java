@@ -160,7 +160,9 @@ class MethodInvoker {
         if ("*".equals(headers.get("Access-Control-Allow-Headers"))) {
             // Access-Control-Request-Headers can't be '*'
             // http://stackoverflow.com/questions/13146892/cors-access-control-allow-headers-wildcard-being-ignored
-            String accessControlRequestHeaders = request.getHeaders().get("Access-Control-Request-Headers");
+            String accessControlRequestHeaders = request.getHeaders().get("Access-Control-Request-Headers") != null ?
+                    request.getHeaders().get("Access-Control-Request-Headers") :
+                    request.getHeaders().get("access-control-request-headers");
             if (!Strings.isNullOrEmpty(accessControlRequestHeaders)) {
                 HashMap<String, String> newHeaders = new HashMap<>(headers);
                 newHeaders.put("Access-Control-Allow-Headers", accessControlRequestHeaders);
