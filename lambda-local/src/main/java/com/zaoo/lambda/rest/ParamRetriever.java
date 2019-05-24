@@ -44,11 +44,12 @@ class ParamRetriever {
             String name = restParam.value();
             // Read from both post data and query string
             String valueStr = context.getQueryStringParameters().get(name);
+            log.debug("getQueryParam:name={},value={}", name, valueStr);
             if (valueStr == null) {
                 valueStr = context.getPostParams().get(name);
+                log.debug("getPostParams:name={},value={}", name, valueStr);
             }
 
-            log.debug("getQueryParam:name={},value={}", name, valueStr);
             if (valueStr == null) {
                 if (restParam.required()) {
                     throw new IllegalArgumentException(String.format("Request param:%s can't be null", name));
